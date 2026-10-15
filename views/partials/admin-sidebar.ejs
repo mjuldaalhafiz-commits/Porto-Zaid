@@ -1,0 +1,60 @@
+<aside class="admin-side">
+  <div style="padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:18px;">
+    <h2 style="font-size:18px;margin:0 0 4px;color:#fff;">Admin CMS</h2>
+    <p style="margin:0;font-size:12px;color:#8e8e93;"><%= typeof adminUser !== 'undefined' ? adminUser : 'Muhammad Julda Al Hafiz' %></p>
+  </div>
+
+  <nav style="display:flex;flex-direction:column;gap:3px;background:none;border:none;padding:0;position:static;">
+    <div style="font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#636366;padding:8px 12px 4px;">Main Content</div>
+    
+    <a href="/admin" class="<%= active === 'dashboard' ? 'active' : '' %>">
+      <span>📊 Overview</span>
+    </a>
+    <a href="/admin/profile" class="<%= active === 'profile' ? 'active' : '' %>">
+      <span>👤 Profile & About Me</span>
+    </a>
+    <a href="/admin/experience" class="<%= active === 'experience' ? 'active' : '' %>">
+      <span>💼 Experience</span>
+    </a>
+    <a href="/admin/education" class="<%= active === 'education' ? 'active' : '' %>">
+      <span>🎓 Education & Leadership</span>
+    </a>
+    <a href="/admin/projects" class="<%= active === 'projects' ? 'active' : '' %>">
+      <span>🚀 Projects & Work Samples</span>
+    </a>
+    <a href="/admin/articles" class="<%= active === 'articles' ? 'active' : '' %>">
+      <span>✍️ Articles & Blog</span>
+    </a>
+    <a href="/admin/certifications" class="<%= active === 'certifications' ? 'active' : '' %>">
+      <span>📜 Certifications & Training</span>
+    </a>
+    <a href="/admin/skills" class="<%= active === 'skills' ? 'active' : '' %>">
+      <span>🛠️ Skills & Tools</span>
+    </a>
+
+    <div style="font-size:10px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#636366;padding:14px 12px 4px;">System & Settings</div>
+
+    <a href="/admin/media" class="<%= active === 'media' ? 'active' : '' %>">
+      <span>📁 Media & File Library</span>
+    </a>
+    <a href="/admin/sections" class="<%= active === 'sections' ? 'active' : '' %>">
+      <span>🧭 Sections & Navigation</span>
+    </a>
+    <a href="/admin/settings" class="<%= active === 'settings' ? 'active' : '' %>">
+      <span>⚙️ SEO & Website Settings</span>
+    </a>
+    <a href="/admin/security" class="<%= active === 'security' ? 'active' : '' %>">
+      <span>🔒 Account, Security & Backup</span>
+    </a>
+  </nav>
+
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;">
+    <a href="/" target="_blank" style="font-size:12.5px;color:#0a84ff;padding:6px 12px;background:rgba(10,132,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:space-between;">
+      <span>Lihat Website Publik</span>
+      <span>↗</span>
+    </a>
+    <form method="post" action="/admin/logout" style="margin:0;">
+      <button class="small-btn danger" style="width:100%;padding:8px 12px;text-align:center;">Logout</button>
+    </form>
+  </div>
+</aside>

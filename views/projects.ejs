@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Project Showcases & Portfolio Evidence — Muhammad Julda Al Hafiz</title>
+  <meta name="description" content="Koleksi studi kasus, bukti kerja visual, sistem operasional HR, dan standarisasi tata kelola Human Resources Muhammad Julda Al Hafiz.">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-in">
+      <a class="brand" href="/">Muhammad Julda Al Hafiz</a>
+      <button class="menu-toggle" type="button" onclick="document.querySelector('.nav-links').classList.toggle('open')">Menu ☰</button>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/experience">Experience</a>
+        <a href="/projects">Projects</a>
+        <a href="/articles">Articles</a>
+        <a href="/certifications">Certifications</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Header -->
+    <section class="hero">
+      <div class="container">
+        <div class="kicker">Work Showcases & Visual Evidence</div>
+        <h1>HR System & Operational Projects</h1>
+        <p class="lead">
+          Kumpulan inisiatif terstruktur, sistem operasional, dan standardisasi proses Human Resources yang diekstraksi langsung dari portofolio profesional dan implementasi kerja saya.
+        </p>
+        <p class="muted">
+          Setiap project dilengkapi dengan latar belakang masalah (*problem statement*), kontribusi nyata, metodologi alur kerja, visual evidence asli beresolusi tinggi, hingga dampak terhadap keandalan bisnis.
+        </p>
+        
+        <!-- Quick Portfolio PDF Download Box -->
+        <div class="portfolio-download-box" style="margin-top:32px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px;">
+          <div>
+            <span class="meta" style="margin-bottom:4px;display:block;">Original Documents</span>
+            <strong style="font-size:17px;display:block;color:var(--ink);">Unduh Berkas Portofolio Lengkap (PDF)</strong>
+            <span class="muted" style="font-size:14px;">Tersedia versi lengkap Portofolio HR Generalist dan Portofolio Standardisasi Sistem HRBP (DMAIC).</span>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a class="btn primary" href="/uploads/documents/Muhammad-Julda-Al-Hafiz-Portofolio-HRBP.pdf" target="_blank">📄 Portofolio DMAIC (11 Hal)</a>
+            <a class="btn" href="/uploads/documents/Portofolio-Muhammad-Julda-Al-Hafiz.pdf" target="_blank">📄 Portofolio HR (16 Hal)</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Project Grid Section -->
+    <section class="section">
+      <div class="container">
+        <!-- Interactive Category Filter Tabs -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:32px;">
+          <button class="filter-tab active" onclick="filterProjects('all', this)">Semua Project (<%= projects.length %>)</button>
+          <button class="filter-tab" onclick="filterProjects('HR Governance & Strategy', this)">Governance & Strategy</button>
+          <button class="filter-tab" onclick="filterProjects('Talent Acquisition & Planning', this)">Recruitment & Talent</button>
+          <button class="filter-tab" onclick="filterProjects('HR Operations & Systems', this)">Operations & Payroll</button>
+          <button class="filter-tab" onclick="filterProjects('General Affairs & Operations', this)">General Affairs</button>
+          <button class="filter-tab" onclick="filterProjects('Organizational Development', this)">Org Development</button>
+        </div>
+
+        <!-- Projects Grid -->
+        <div class="grid" id="projectsGrid">
+          <% projects.forEach(p => { %>
+            <article class="card project-item" data-category="<%= p.category || '' %>" style="display:flex;flex-direction:column;overflow:hidden;padding:0;">
+              <% if (p.cover) { %>
+                <a href="/projects/<%= p.slug %>" style="display:block;overflow:hidden;border-bottom:1px solid var(--line);background:#f2f1ed;aspect-ratio:16/9;">
+                  <img src="/uploads/<%= p.cover %>" alt="<%= p.title %>" style="width:100%;height:100%;object-fit:cover;object-position:top;transition:transform 0.25s ease;" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'">
+                </a>
+              <% } %>
+              
+              <div style="padding:24px;display:flex;flex-direction:column;flex-grow:1;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="meta"><%= p.category || p.type || 'HR Project' %></span>
+                  <% if (p.status) { %>
+                    <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;background:#f0eee9;color:#555;">
+                      <%= p.status %>
+                    </span>
+                  <% } %>
+                </div>
+
+                <h3 style="margin-top:4px;margin-bottom:12px;font-size:21px;line-height:1.3;">
+                  <a href="/projects/<%= p.slug %>" style="color:var(--ink);"><%= p.title %></a>
+                </h3>
+
+                <p class="muted" style="font-size:14px;line-height:1.6;margin-bottom:18px;flex-grow:1;">
+                  <%= p.summary %>
+                </p>
+
+                <% if (p.disclosure) { %>
+                  <div style="font-size:11.5px;color:#7b4037;background:#fdf6f5;border:1px solid #f6deda;padding:6px 10px;border-radius:4px;margin-bottom:18px;line-height:1.4;">
+                    ℹ️ <%= p.disclosure %>
+                  </div>
+                <% } %>
+
+                <div style="display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid var(--line);">
+                  <a class="btn primary" href="/projects/<%= p.slug %>" style="font-size:13px;padding:8px 16px;">
+                    Lihat Bukti & Detail →
+                  </a>
+                  <% if (p.pdf_file) { %>
+                    <a href="/uploads/<%= p.pdf_file %>" target="_blank" style="font-size:12.5px;color:var(--muted);font-weight:600;" title="Buka Dokumen Asli">
+                      PDF Source ↗
+                    </a>
+                  <% } %>
+                </div>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong>Muhammad Julda Al Hafiz</strong><br>
+      HR Generalist | Recruitment · Payroll · HR Operations · HRGA · DMAIC
+    </div>
+  </footer>
+
+  <script>
+    function filterProjects(cat, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      const items = document.querySelectorAll('.project-item');
+      items.forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-category').includes(cat)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

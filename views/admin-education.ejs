@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Education & Leadership — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'education' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Education & Leadership</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola riwayat pendidikan dan kegiatan organisasi.</p>
+        </div>
+      </div>
+
+      <!-- Add / Edit Form -->
+      <div class="admin-card">
+        <h2><%= typeof editItem !== 'undefined' && editItem ? '✏️ Edit Education' : '➕ Add Education' %></h2>
+        <form method="post" action="/admin/education/save">
+          <input type="hidden" name="id" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.id : '' %>">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+            <div>
+              <label>Title / Degree *</label>
+              <input name="title" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.title : '' %>" required>
+            </div>
+            <div>
+              <label>Institution</label>
+              <input name="institution" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.institution : '' %>">
+            </div>
+          </div>
+
+          <label>Period</label>
+          <input name="period" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.period : '' %>">
+
+          <label>Description</label>
+          <textarea name="description" style="min-height:100px;"><%= typeof editItem !== 'undefined' && editItem ? editItem.description : '' %></textarea>
+
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button class="btn primary">
+              <%= typeof editItem !== 'undefined' && editItem ? 'Update Education' : 'Add Education' %>
+            </button>
+            <% if (typeof editItem !== 'undefined' && editItem) { %>
+              <a class="btn" href="/admin/education">Cancel</a>
+            <% } %>
+          </div>
+        </form>
+      </div>
+
+      <!-- Education Table -->
+      <div class="admin-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Title / Degree</th>
+              <th>Institution</th>
+              <th>Period</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% education.forEach(e => { %>
+              <tr>
+                <td><strong><%= e.title %></strong></td>
+                <td><%= e.institution %></td>
+                <td style="font-size:13px;color:var(--muted);"><%= e.period %></td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/education?edit=<%= e.id %>">Edit</a>
+                  <form style="display:inline;" method="post" action="/admin/education/<%= e.id %>/delete" onsubmit="return confirm('Hapus data pendidikan ini?');">
+                    <button class="small-btn danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (education.length === 0) { %>
+              <tr>
+                <td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">Belum ada data pendidikan.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

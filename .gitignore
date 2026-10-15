@@ -1,0 +1,16 @@
+# Dependency directories
+node_modules/
+
+# Environment variables (Berisi rahasia login lokal)
+.env
+
+# MacOS system files
+.DS_Store
+
+# Temporary files & logs
+*.log
+npm-debug.log*
+
+# Backups manual
+backups/*.db
+!backups/.gitkeep

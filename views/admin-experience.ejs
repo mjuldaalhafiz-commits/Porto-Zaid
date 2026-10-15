@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Experience — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'experience' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Work Experience</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola riwayat karir profesional, peran jabatan, dan pencapaian operasional HR.</p>
+        </div>
+        <a class="btn primary" href="#exp-form">+ Tambah Pengalaman Baru</a>
+      </div>
+
+      <!-- Add / Edit Form Card -->
+      <div class="admin-card" id="exp-form">
+        <h2><%= typeof editItem !== 'undefined' && editItem ? '✏️ Edit Pengalaman Kerja' : '➕ Tambah Pengalaman Kerja Baru' %></h2>
+        <form method="post" action="/admin/experience/save">
+          <input type="hidden" name="id" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.id : '' %>">
+
+          <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:18px;">
+            <div>
+              <label>Posisi / Role *</label>
+              <input name="role" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.role : '' %>" required placeholder="Contoh: HR Generalist">
+            </div>
+            <div>
+              <label>Perusahaan / Organisasi *</label>
+              <input name="company" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.company : '' %>" required placeholder="Contoh: CV. Sumber Rezeki | Manufaktur & Distribusi">
+            </div>
+            <div>
+              <label>Periode Waktu *</label>
+              <input name="period" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.period : '' %>" required placeholder="Contoh: Apr 2025 – Sekarang">
+            </div>
+          </div>
+
+          <label>Uraian Tanggung Jawab & Pencapaian Utama (Gunakan Bullet Points • per baris)</label>
+          <textarea name="description" style="min-height:160px;" placeholder="• Membangun proses rekrutmen end-to-end...&#10;• Membangun sistem payroll berbasis Excel untuk 100+ karyawan..."><%= typeof editItem !== 'undefined' && editItem ? editItem.description : '' %></textarea>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn primary">
+              <%= typeof editItem !== 'undefined' && editItem ? 'Update Pengalaman Kerja' : 'Simpan Pengalaman Kerja' %>
+            </button>
+            <% if (typeof editItem !== 'undefined' && editItem) { %>
+              <a class="btn" href="/admin/experience">Batal Edit</a>
+            <% } %>
+          </div>
+        </form>
+      </div>
+
+      <!-- Experience Table -->
+      <div class="admin-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Role & Jabatan</th>
+              <th>Perusahaan</th>
+              <th>Periode</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% experiences.forEach(e => { %>
+              <tr>
+                <td>
+                  <strong><%= e.role %></strong>
+                  <div style="font-size:12.5px;color:var(--muted);margin-top:4px;max-height:80px;overflow:hidden;text-overflow:ellipsis;">
+                    <%= e.description ? e.description.substring(0, 150) + '...' : '' %>
+                  </div>
+                </td>
+                <td style="font-size:13.5px;"><%= e.company %></td>
+                <td style="font-size:13px;color:var(--muted);"><%= e.period %></td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/experience?edit=<%= e.id %>">Edit</a>
+                  <form style="display:inline;" method="post" action="/admin/experience/<%= e.id %>/delete" onsubmit="return confirm('Hapus pengalaman ini?');">
+                    <button class="small-btn danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

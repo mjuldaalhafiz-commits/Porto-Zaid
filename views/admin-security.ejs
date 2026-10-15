@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Account, Security & Backup — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'security' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Account, Security & Backup</h1>
+          <p class="muted" style="margin:4px 0 0;">Manajemen kredensial login, enkripsi password, perlindungan brute-force, dan cadangan database.</p>
+        </div>
+        <a class="btn primary" href="/admin/security/backup/download">⬇️ Unduh Database Saat Ini (.db)</a>
+      </div>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="notice" style="background:#fee2e2;color:#991b1b;border-color:#f87171;margin-bottom:20px;">
+          ⚠️ <strong>Gagal:</strong> <%= error %>
+        </div>
+      <% } %>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;">
+          ✅ <%= success %>
+        </div>
+      <% } %>
+
+      <div class="grid" style="grid-template-columns:1.2fr 1fr;gap:24px;">
+        <!-- Change Password Form -->
+        <div class="admin-card" style="margin:0;">
+          <h2 style="font-size:19px;margin-bottom:14px;">🔐 Ubah Akun & Password Admin</h2>
+          <form method="post" action="/admin/security/password">
+            <label>Username Admin</label>
+            <input name="username" value="<%= adminUser %>" required>
+
+            <label>Password Saat Ini (Verifikasi Keamanan) *</label>
+            <input type="password" name="current_password" required placeholder="Masukkan password yang aktif saat ini">
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+              <div>
+                <label>Password Baru *</label>
+                <input type="password" name="new_password" required minlength="6" placeholder="Minimal 6 karakter">
+              </div>
+              <div>
+                <label>Konfirmasi Password Baru *</label>
+                <input type="password" name="confirm_password" required minlength="6" placeholder="Ulangi password baru">
+              </div>
+            </div>
+
+            <p class="muted" style="font-size:12px;margin-top:10px;">
+              🔒 Password disimpan menggunakan algoritma hashing standar Node.js Scrypt (salted) yang aman dari serangan rainbow table.
+            </p>
+
+            <div style="margin-top:20px;">
+              <button class="btn primary">Simpan Kredensial Baru</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Security & Rate Limiting Overview -->
+        <div class="admin-card" style="margin:0;">
+          <h2 style="font-size:19px;margin-bottom:14px;">🛡️ Status Keamanan & Proteksi</h2>
+          
+          <table style="font-size:13px;">
+            <tr>
+              <td style="padding:8px 0;color:var(--muted);">Enkripsi Password</td>
+              <td style="padding:8px 0;font-weight:700;text-align:right;color:#166534;">Scrypt 64-byte + Salt</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:var(--muted);">Proteksi Brute-Force</td>
+              <td style="padding:8px 0;font-weight:700;text-align:right;color:#166534;">Aktif (Maks 5 attempt / 15m)</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:var(--muted);">Session Security</td>
+              <td style="padding:8px 0;font-weight:700;text-align:right;">HttpOnly, SameSite Lax</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:var(--muted);">Database Journal Mode</td>
+              <td style="padding:8px 0;font-weight:700;text-align:right;">WAL (Write-Ahead Logging)</td>
+            </tr>
+            <tr>
+              <td style="padding:8px 0;color:var(--muted);">Safe File Deletion</td>
+              <td style="padding:8px 0;font-weight:700;text-align:right;color:#166534;">Pemeriksaan Relasi Aktif</td>
+            </tr>
+          </table>
+
+          <div style="margin-top:20px;padding:14px;background:#fbfbfa;border:1px solid var(--line);border-radius:var(--radius);font-size:13px;color:var(--muted);line-height:1.6;">
+            💡 <strong>Catatan Deployment Produksi:</strong><br>
+            Database SQLite disimpan secara lokal di folder <code>data/site.db</code> dan semua file unggahan di folder <code>uploads/</code>. Jika di-deploy ke hosting container/serverless (seperti Vercel/Render ephemeral disk), pastikan untuk memasang volume mount persisten atau object storage agar file tidak terhapus saat redeploy.
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Backup & Snapshot Section -->
+      <div class="admin-card" style="margin-top:28px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 style="font-size:19px;margin:0 0 4px;">💾 Manajemen Backup Database (SQLite Snapshots)</h2>
+            <p class="muted" style="margin:0;font-size:13px;">Daftar salinan database yang tersimpan di direktori server <code>backups/</code>.</p>
+          </div>
+          <form method="post" action="/admin/security/backup/create">
+            <button class="btn primary" style="font-size:13px;padding:8px 16px;">+ Buat Backup Snapshot Sekarang</button>
+          </form>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Nama File Backup</th>
+              <th>Ukuran File</th>
+              <th>Waktu Pembuatan</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (backups.length === 0) { %>
+              <tr>
+                <td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">Belum ada snapshot cadangan di folder backups/.</td>
+              </tr>
+            <% } %>
+            <% backups.forEach(b => { %>
+              <tr>
+                <td><strong><%= b.filename %></strong></td>
+                <td style="font-size:13px;color:var(--muted);"><%= (b.size / 1024).toFixed(1) %> KB</td>
+                <td style="font-size:13px;color:var(--muted);"><%= new Date(b.mtime).toLocaleString('id-ID') %></td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/security/backup/download/<%= b.filename %>">Download</a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

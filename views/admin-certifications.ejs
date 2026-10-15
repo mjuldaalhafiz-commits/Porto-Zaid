@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Certifications & Training — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'certifications' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Certifications & Training</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola sertifikat BNSP, pelatihan profesional, surat lisensi, dan lampiran berkas resmi.</p>
+        </div>
+        <a class="btn primary" href="#cert-form" onclick="resetForm()">+ Tambah Sertifikat Baru</a>
+      </div>
+
+      <!-- Add / Edit Form Card -->
+      <div class="admin-card" id="cert-form">
+        <h2><%= typeof editItem !== 'undefined' && editItem ? '✏️ Edit Sertifikasi' : '➕ Tambah Sertifikasi Baru' %></h2>
+        <form method="post" action="/admin/certifications/save" enctype="multipart/form-data">
+          <input type="hidden" name="id" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.id : '' %>">
+
+          <div style="display:grid;grid-template-columns:2fr 1.5fr;gap:18px;">
+            <div>
+              <label>Nama Sertifikat / Pelatihan *</label>
+              <input name="title" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.title : '' %>" required placeholder="Contoh: BNSP HR Staff">
+            </div>
+            <div>
+              <label>Lembaga Penerbit (Issuer) *</label>
+              <input name="issuer" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.issuer : '' %>" required placeholder="Contoh: LSP Manajemen & Pengembangan SDM">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 100px;gap:18px;">
+            <div>
+              <label>Tanggal / Waktu Terbit</label>
+              <input name="issue_date" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.issue_date || editItem.year || '') : '' %>" placeholder="Contoh: Oktober 2025">
+            </div>
+            <div>
+              <label>Masa Berlaku (Jika Ada)</label>
+              <input name="expiry_date" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.expiry_date || '') : '' %>" placeholder="Contoh: Oktober 2028 / Seumur Hidup">
+            </div>
+            <div>
+              <label>Credential ID (Jika Tersedia)</label>
+              <input name="credential_id" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.credential_id || '') : '' %>" placeholder="Nomor Registrasi / Lisensi">
+            </div>
+            <div>
+              <label>Urutan</label>
+              <input type="number" name="display_order" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.display_order || 0) : 0 %>" style="text-align:center;">
+            </div>
+          </div>
+
+          <label>Deskripsi / Kompetensi yang Dicakup</label>
+          <textarea name="description" style="min-height:90px;" placeholder="Uraian kompetensi yang diuji, cakupan materi pelatihan, atau nomor SKKNI..."><%= typeof editItem !== 'undefined' && editItem ? (editItem.description || '') : '' %></textarea>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:14px;padding:16px;background:#fbfbfa;border:1px solid var(--line);border-radius:var(--radius);">
+            <div>
+              <label style="margin-top:0;">Unggah File Sertifikat (PDF / Gambar)</label>
+              <input type="file" name="file" accept=".pdf,image/*">
+              <% if (typeof editItem !== 'undefined' && editItem && editItem.file) { %>
+                <div style="margin-top:8px;">
+                  <span style="font-size:12px;color:var(--muted);display:block;">Berkas saat ini:</span>
+                  <a href="/uploads/<%= editItem.file %>" target="_blank" style="font-size:12px;font-weight:700;color:var(--accent);">
+                    📄 <%= editItem.file %>
+                  </a>
+                </div>
+              <% } %>
+            </div>
+
+            <div>
+              <label style="margin-top:0;">Status Publikasi</label>
+              <select name="status">
+                <option value="published" <%= (typeof editItem !== 'undefined' && editItem && editItem.status === 'draft') ? '' : 'selected' %>>🟢 Published (Tampil di Publik)</option>
+                <option value="draft" <%= (typeof editItem !== 'undefined' && editItem && editItem.status === 'draft') ? 'selected' : '' %>>🟡 Draft (Hanya Admin)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="margin-top:0;">Akses Download Publik</label>
+              <select name="is_downloadable">
+                <option value="1" <%= (typeof editItem !== 'undefined' && editItem && editItem.is_downloadable == 0) ? '' : 'selected' %>>Boleh Diunduh / Dilihat Publik</option>
+                <option value="0" <%= (typeof editItem !== 'undefined' && editItem && editItem.is_downloadable == 0) ? 'selected' : '' %>>Privat (Hanya Lihat Info Nama)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn primary">
+              <%= typeof editItem !== 'undefined' && editItem ? 'Update Sertifikat' : 'Simpan Sertifikat' %>
+            </button>
+            <% if (typeof editItem !== 'undefined' && editItem) { %>
+              <a class="btn" href="/admin/certifications">Batal Edit</a>
+            <% } %>
+          </div>
+        </form>
+      </div>
+
+      <!-- Certifications Table -->
+      <div class="admin-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px;text-align:center;">#</th>
+              <th>Nama Sertifikat</th>
+              <th>Lembaga Penerbit</th>
+              <th>Waktu Terbit / Masa Berlaku</th>
+              <th>Credential ID</th>
+              <th style="text-align:center;">Lampiran</th>
+              <th style="text-align:center;">Status</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% certifications.forEach((c, idx) => { %>
+              <tr>
+                <td style="text-align:center;font-weight:700;color:var(--muted);"><%= c.display_order || (idx + 1) %></td>
+                <td>
+                  <strong><%= c.title %></strong>
+                  <% if (c.description) { %>
+                    <p style="font-size:12px;color:var(--muted);margin:3px 0 0;"><%= c.description %></p>
+                  <% } %>
+                </td>
+                <td style="font-size:13.5px;"><%= c.issuer || '-' %></td>
+                <td style="font-size:13px;">
+                  <%= c.issue_date || c.year || '-' %>
+                  <% if (c.expiry_date) { %>
+                    <br><small style="color:var(--muted);">s/d <%= c.expiry_date %></small>
+                  <% } %>
+                </td>
+                <td style="font-size:12px;font-family:monospace;"><%= c.credential_id || '-' %></td>
+                <td style="text-align:center;">
+                  <% if (c.file) { %>
+                    <a class="small-btn" href="/uploads/<%= c.file %>" target="_blank" title="Lihat Berkas Asli">
+                      📄 Preview
+                    </a>
+                  <% } else { %>
+                    <span style="font-size:11px;color:#aaa;">Tidak ada file</span>
+                  <% } %>
+                </td>
+                <td style="text-align:center;">
+                  <% if (c.status === 'draft') { %>
+                    <span style="font-size:11px;font-weight:700;background:#fef3c7;color:#92400e;padding:3px 8px;border-radius:10px;">Draft</span>
+                  <% } else { %>
+                    <span style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:3px 8px;border-radius:10px;">Published</span>
+                  <% } %>
+                </td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/certifications?edit=<%= c.id %>">Edit</a>
+                  <form style="display:inline;" method="post" action="/admin/certifications/<%= c.id %>/delete" onsubmit="return confirm('Apakah Anda yakin ingin menghapus sertifikat ini?');">
+                    <button class="small-btn danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

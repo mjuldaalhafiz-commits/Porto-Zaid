@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= project.title %> — Muhammad Julda Al Hafiz</title>
+  <meta name="description" content="<%= project.summary %>">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-in">
+      <a class="brand" href="/">Muhammad Julda Al Hafiz</a>
+      <button class="menu-toggle" type="button" onclick="document.querySelector('.nav-links').classList.toggle('open')">Menu ☰</button>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/experience">Experience</a>
+        <a href="/projects">Projects</a>
+        <a href="/articles">Articles</a>
+        <a href="/certifications">Certifications</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Breadcrumbs & Header -->
+    <article class="hero" style="padding-bottom:50px;">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <nav style="font-size:13px;margin-bottom:18px;color:var(--muted);background:none;border:none;position:static;padding:0;">
+          <a href="/projects" style="color:var(--accent);font-weight:700;">← Kembali ke Semua Project</a>
+          <span style="margin:0 8px;">/</span>
+          <span><%= project.category || project.type || 'Showcase' %></span>
+        </nav>
+
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+          <span class="kicker" style="margin:0;"><%= project.category || project.type %></span>
+          <% if (project.status) { %>
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;background:#f0eee9;color:#444;">
+              <%= project.status %>
+            </span>
+          <% } %>
+        </div>
+
+        <h1 style="margin-top:10px;margin-bottom:20px;"><%= project.title %></h1>
+        <p class="lead" style="font-size:21px;color:#333;"><%= project.summary %></p>
+
+        <% if (project.disclosure) { %>
+          <div class="notice" style="margin-top:24px;display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:18px;">ℹ️</span>
+            <div>
+              <strong style="display:block;margin-bottom:2px;">Status & Disclosure:</strong>
+              <span><%= project.disclosure %></span>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="actions" style="margin-top:28px;">
+          <% if (project.pdf_file) { %>
+            <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka Dokumen Asli (PDF)</a>
+            <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Unduh PDF</a>
+          <% } %>
+          <a class="btn" href="#evidence-section">Lihat Bukti Visual (Evidence) ↓</a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Project Narrative Grid: Problem & Contribution -->
+    <section class="section" style="background:#fff;">
+      <div class="container">
+        <div class="grid" style="grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));gap:32px;">
+          <!-- Problem Box -->
+          <div class="admin-card" style="margin:0;border-left:4px solid #b91c1c;">
+            <div class="kicker" style="color:#b91c1c;">Latar Belakang & Masalah</div>
+            <h2 style="font-size:24px;margin-top:6px;margin-bottom:16px;">Tantangan yang Dihadapi</h2>
+            <div style="font-size:16px;line-height:1.75;color:#333;">
+              <%- (project.problem || 'Kondisi operasional yang belum memiliki standar dan dokumentasi tertulis.').split(/\n+/).map(p=>`<p style="margin-bottom:14px;">${p}</p>`).join('') %>
+            </div>
+          </div>
+
+          <!-- Contribution Box -->
+          <div class="admin-card" style="margin:0;border-left:4px solid #1f2022;">
+            <div class="kicker" style="color:var(--ink);">Peran & Tanggung Jawab</div>
+            <h2 style="font-size:24px;margin-top:6px;margin-bottom:16px;">Kontribusi Saya</h2>
+            <div style="font-size:16px;line-height:1.75;color:#333;">
+              <% const contribPoints = (project.contribution || '').split(/\n+/).filter(Boolean); %>
+              <% if (contribPoints.length > 1) { %>
+                <ul style="padding-left:20px;margin:0;">
+                  <% contribPoints.forEach(pt => { %>
+                    <li style="margin-bottom:10px;"><%= pt.replace(/^[•\-\*]\s*/, '') %></li>
+                  <% }) %>
+                </ul>
+              <% } else { %>
+                <p><%= project.contribution %></p>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Methodology & Process Section -->
+    <% if (project.process) { %>
+      <section class="section">
+        <div class="container">
+          <div class="kicker">Metodologi Kerja</div>
+          <h2>Proses & Pendekatan Pelaksanaan</h2>
+          <div class="admin-card" style="font-size:16.5px;line-height:1.8;color:#2a2a2b;">
+            <%- project.process.split(/\n{2,}|\n(?=[0-9]+\.|\b[A-Z\s]+:)/).map(t => `<p style="margin-bottom:16px;">${t.replace(/\n/g, '<br>')}</p>`).join('') %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- Visual Evidence & Sample Work Gallery -->
+    <section class="section" id="evidence-section" style="background:#fff;">
+      <div class="container">
+        <div class="kicker">Dokumentasi Asli</div>
+        <h2>Sample Work & Bukti Visual (Evidence)</h2>
+        <p class="muted" style="margin-bottom:30px;max-width:800px;">
+          Bukti visual berikut diekstraksi langsung dari berkas portofolio resmi saya. Seluruh nama entitas dan data karyawan sensitif telah dianonimkan untuk menjaga integritas kerahasiaan. Klik gambar untuk memperbesar resolusi.
+        </p>
+
+        <% 
+          let galleryItems = [];
+          try {
+            if (project.gallery) {
+              galleryItems = JSON.parse(project.gallery);
+            }
+          } catch(e) {}
+          if (!galleryItems.length && project.cover) {
+            galleryItems.push({ src: project.cover, caption: project.title });
+          }
+        %>
+
+        <div style="display:flex;flex-direction:column;gap:36px;">
+          <% galleryItems.forEach((item, idx) => { %>
+            <figure class="evidence-figure" style="margin:0;background:#fbfbfa;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.03);">
+              <div style="background:#222;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;color:#eee;font-size:13px;">
+                <span><strong>Evidence #<%= idx + 1 %>:</strong> <%= item.caption || project.title %></span>
+                <a href="/uploads/<%= item.src %>" target="_blank" style="color:#fdfdfd;text-decoration:underline;font-size:12px;">Buka Resolusi Penuh ↗</a>
+              </div>
+              <div style="cursor:zoom-in;overflow:hidden;display:flex;justify-content:center;background:#18181a;" onclick="openLightbox('/uploads/<%= item.src %>', '<%= (item.caption || project.title).replace(/'/g, '') %>')">
+                <img src="/uploads/<%= item.src %>" alt="<%= item.caption || project.title %>" style="max-width:100%;height:auto;display:block;max-height:850px;object-fit:contain;">
+              </div>
+              <% if (item.caption) { %>
+                <figcaption style="padding:16px 22px;font-size:14px;color:var(--muted);border-top:1px solid var(--line);background:#ffffff;line-height:1.5;">
+                  🔍 <strong>Keterangan Bukti:</strong> <%= item.caption %>
+                </figcaption>
+              <% } %>
+            </figure>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Outcome & Intended Benefit -->
+    <% if (project.outcome) { %>
+      <section class="section">
+        <div class="container">
+          <div class="kicker">Dampak Operasional</div>
+          <h2>Hasil Kerja & Manfaat Nyata</h2>
+          <div class="admin-card" style="font-size:16.5px;line-height:1.8;color:#2a2a2b;">
+            <% const outPoints = project.outcome.split(/\n+/).filter(Boolean); %>
+            <% if (outPoints.length > 1) { %>
+              <ul style="padding-left:22px;margin:0;">
+                <% outPoints.forEach(pt => { %>
+                  <li style="margin-bottom:12px;"><%= pt.replace(/^[•\-\*]\s*/, '') %></li>
+                <% }) %>
+              </ul>
+            <% } else { %>
+              <p><%= project.outcome %></p>
+            <% } %>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- PDF Document Preview & Download Section -->
+    <% if (project.pdf_file) { %>
+      <section class="section" style="background:#fff;">
+        <div class="container">
+          <div class="kicker">Dokumen Sumber</div>
+          <h2>Pratinjau & Unduh Dokumen Lengkap</h2>
+          <p class="muted" style="margin-bottom:24px;">
+            Anda dapat melihat berkas asli secara langsung pada pratinjau di bawah ini atau mengunduhnya untuk dipelajari lebih lanjut.
+          </p>
+
+          <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+            <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka PDF di Tab Baru</a>
+            <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Download PDF Asli</a>
+          </div>
+
+          <!-- Embedded PDF Viewer -->
+          <div style="border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#525659;height:700px;width:100%;">
+            <iframe src="/uploads/<%= project.pdf_file %>" style="width:100%;height:100%;border:none;" title="Pratinjau Dokumen PDF">
+              <p>Browser Anda tidak mendukung preview iframe PDF. Silakan <a href="/uploads/<%= project.pdf_file %>">klik di sini untuk mengunduh PDF</a>.</p>
+            </iframe>
+          </div>
+        </div>
+      </section>
+    <% } %>
+
+    <!-- Navigation between Projects -->
+    <section class="section">
+      <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+        <a class="btn" href="/projects">← Kembali ke Daftar Project</a>
+        <a class="btn primary" href="/contact">Hubungi Muhammad Julda Al Hafiz →</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Lightbox Modal for High-Res Image Inspection -->
+  <div id="lightboxModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px);" onclick="closeLightbox()">
+    <div style="position:relative;max-width:1200px;width:100%;max-height:92vh;display:flex;flex-direction:column;align-items:center;" onclick="event.stopPropagation()">
+      <button onclick="closeLightbox()" style="position:absolute;top:-45px;right:0;background:#ffffff;border:none;padding:8px 16px;border-radius:4px;font-weight:700;cursor:pointer;">Tutup (✕)</button>
+      <img id="lightboxImg" src="" alt="" style="max-width:100%;max-height:82vh;object-fit:contain;border-radius:6px;box-shadow:0 8px 30px rgba(0,0,0,0.5);">
+      <p id="lightboxCaption" style="color:#ffffff;margin-top:14px;font-size:15px;text-align:center;max-width:850px;"></p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <strong>Muhammad Julda Al Hafiz</strong><br>
+      HR Generalist | Recruitment · Payroll · HR Operations · HRGA · DMAIC
+    </div>
+  </footer>
+
+  <script>
+    function openLightbox(src, caption) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightboxCaption').textContent = caption;
+      const modal = document.getElementById('lightboxModal');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      const modal = document.getElementById('lightboxModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>

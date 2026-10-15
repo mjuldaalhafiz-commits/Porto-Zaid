@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= project ? "Edit Project: " + project.title : "New Project Showcase" %> — Admin</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <aside class="admin-side">
+      <h2>Admin CMS</h2>
+      <p>Muhammad Julda Al Hafiz</p>
+      <a href="/admin">Dashboard</a>
+      <a href="/admin/profile">Profile & CV</a>
+      <a href="/admin/articles">Articles</a>
+      <a href="/admin/projects" style="background:rgba(255,255,255,0.12);color:#fff;font-weight:700;">Projects</a>
+      <a href="/admin/experience">Experience</a>
+      <a href="/admin/certifications">Certifications</a>
+      <a href="/admin/education">Education</a>
+      <a href="/" target="_blank">View Public Website ↗</a>
+      <form method="post" action="/admin/logout">
+        <button class="small-btn">Logout</button>
+      </form>
+    </aside>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;"><%= project ? "Edit Project Showcase" : "New Project Showcase" %></h1>
+          <p class="muted" style="margin:4px 0 0;">Lengkapi informasi, latar belakang masalah, bukti kerja visual, dan file dokumen.</p>
+        </div>
+        <a class="btn" href="/admin/projects">← Kembali ke Daftar</a>
+      </div>
+
+      <form class="admin-card" method="post" action="/admin/projects/save" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<%= project?.id || '' %>">
+
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+          <div>
+            <label>Project Title *</label>
+            <input name="title" value="<%= project?.title || '' %>" required placeholder="Contoh: HR System Standardization & Strengthening — DMAIC">
+          </div>
+          <div>
+            <label>Custom Slug (URL Friendly)</label>
+            <input name="slug" value="<%= project?.slug || '' %>" placeholder="otomatis digenerate jika kosong">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 100px 140px;gap:18px;">
+          <div>
+            <label>Kategori</label>
+            <input name="category" value="<%= project?.category || '' %>" placeholder="e.g. HR Governance & Strategy, Talent Acquisition & Planning">
+          </div>
+          <div>
+            <label>Status / Model</label>
+            <input name="status" value="<%= project?.status || '' %>" placeholder="e.g. Operational System, Framework & Transformation Model">
+          </div>
+          <div>
+            <label>Urutan</label>
+            <input type="number" name="display_order" value="<%= project?.display_order || 0 %>" style="text-align:center;">
+          </div>
+          <div>
+            <label>Visibility</label>
+            <select name="is_public">
+              <option value="1" <%= (project?.is_public != 0) ? 'selected' : '' %>>🟢 Public</option>
+              <option value="0" <%= (project?.is_public == 0) ? 'selected' : '' %>>🟡 Draft / Hidden</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Executive Summary / Ringkasan Singkat *</label>
+        <textarea name="summary" style="min-height:80px;" required placeholder="Ringkasan 1-2 kalimat untuk kartu depan..."><%= project?.summary || '' %></textarea>
+
+        <label>Problem Statement / Tantangan yang Dihadapi</label>
+        <textarea name="problem" style="min-height:110px;" placeholder="Jelaskan kondisi awal, kendala operasional, atau inefisiensi yang ingin diselesaikan..."><%= project?.problem || '' %></textarea>
+
+        <label>Kontribusi Saya (My Contribution)</label>
+        <textarea name="contribution" style="min-height:130px;" placeholder="Gunakan bullet points (•) untuk menjelaskan apa yang Anda rancang, bangun, dan jalankan..."><%= project?.contribution || '' %></textarea>
+
+        <label>Proses & Pendekatan (Process / Methodology)</label>
+        <textarea name="process" style="min-height:120px;" placeholder="Jelaskan alur kerja bertahap atau framework yang digunakan (misal: DMAIC, PDCA, 8-Stage Funnel)..."><%= project?.process || '' %></textarea>
+
+        <label>Hasil & Manfaat Nyata (Outcome & Business Benefit)</label>
+        <textarea name="outcome" style="min-height:110px;" placeholder="Sebutkan hasil operasional terukur (misal: 45+ posisi terisi, payroll bebas salah bayar)..."><%= project?.outcome || '' %></textarea>
+
+        <label>Status & Catatan Kerahasiaan (Disclosure)</label>
+        <input name="disclosure" value="<%= project?.disclosure || '' %>" placeholder="Contoh: Data & Dokumen Ilustratif / Anonymized untuk Menjaga Kerahasiaan Informasi Perusahaan">
+
+        <!-- File Upload Section -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px;padding:20px;background:#fbfbfa;border:1px solid var(--line);border-radius:var(--radius);">
+          <div>
+            <label style="margin-top:0;">Cover Image (PNG/JPG)</label>
+            <input type="file" name="cover" accept="image/*">
+            <% if (project?.cover) { %>
+              <div style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+                <img src="/uploads/<%= project.cover %>" alt="" style="width:90px;height:55px;object-fit:cover;border-radius:4px;border:1px solid var(--line);">
+                <div>
+                  <span style="font-size:12px;color:var(--muted);display:block;">Cover saat ini:</span>
+                  <a href="/uploads/<%= project.cover %>" target="_blank" style="font-size:12px;font-weight:700;"><%= project.cover %></a>
+                </div>
+              </div>
+            <% } %>
+          </div>
+
+          <div>
+            <label style="margin-top:0;">Dokumen Pendukung / PDF File</label>
+            <input type="file" name="pdf_file" accept=".pdf">
+            <% if (project?.pdf_file) { %>
+              <div style="margin-top:10px;">
+                <span style="font-size:12px;color:var(--muted);display:block;">PDF saat ini:</span>
+                <a href="/uploads/<%= project.pdf_file %>" target="_blank" style="font-size:12.5px;font-weight:700;color:var(--accent);">
+                  📄 <%= project.pdf_file %>
+                </a>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Evidence Gallery JSON configuration -->
+        <div style="margin-top:20px;">
+          <label>Visual Evidence Gallery (JSON Format Array)</label>
+          <p class="muted" style="font-size:12.5px;margin-top:-4px;margin-bottom:8px;">
+            Daftar bukti visual dan keterangan (caption) per halaman. Format: <code>[{"src": "evidence/filename.png", "caption": "Keterangan gambar..."}]</code>
+          </p>
+          <textarea name="gallery" style="min-height:120px;font-family:monospace;font-size:13px;"><%= project?.gallery || '' %></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:28px;">
+          <button class="btn primary" style="padding:12px 28px;">Simpan Perubahan Project</button>
+          <a class="btn" href="/admin/projects" style="padding:12px 24px;">Batal</a>
+        </div>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

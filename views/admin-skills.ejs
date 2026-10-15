@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Skills & Tools — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'skills' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Skills & Tools</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola daftar kompetensi teknis, metodologi, dan tools HR yang ditampilkan pada profil.</p>
+        </div>
+        <a class="btn primary" href="#skill-form">+ Tambah Keahlian Baru</a>
+      </div>
+
+      <!-- Add / Edit Form Card -->
+      <div class="admin-card" id="skill-form">
+        <h2><%= typeof editItem !== 'undefined' && editItem ? '✏️ Edit Keahlian' : '➕ Tambah Keahlian Baru' %></h2>
+        <form method="post" action="/admin/skills/save">
+          <input type="hidden" name="id" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.id : '' %>">
+
+          <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr;gap:18px;">
+            <div>
+              <label>Nama Keahlian / Tool *</label>
+              <input name="name" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.name : '' %>" required placeholder="Contoh: End-to-End Recruitment, Excel Payroll">
+            </div>
+
+            <div>
+              <label>Kategori *</label>
+              <select name="category" required>
+                <option value="Recruitment & Talent" <%= (typeof editItem !== 'undefined' && editItem && editItem.category === 'Recruitment & Talent') ? 'selected' : '' %>>Recruitment & Talent</option>
+                <option value="HR Operations & Payroll" <%= (typeof editItem !== 'undefined' && editItem && editItem.category === 'HR Operations & Payroll') ? 'selected' : '' %>>HR Operations & Payroll</option>
+                <option value="HR Governance & Strategy" <%= (typeof editItem !== 'undefined' && editItem && editItem.category === 'HR Governance & Strategy') ? 'selected' : '' %>>HR Governance & Strategy</option>
+                <option value="General Affairs & Tools" <%= (typeof editItem !== 'undefined' && editItem && editItem.category === 'General Affairs & Tools') ? 'selected' : '' %>>General Affairs & Tools</option>
+                <option value="Other" <%= (typeof editItem !== 'undefined' && editItem && editItem.category === 'Other') ? 'selected' : '' %>>Lainnya / Tambahan</option>
+              </select>
+            </div>
+
+            <div>
+              <label>Tingkat Penguasaan</label>
+              <input name="level" value="<%= typeof editItem !== 'undefined' && editItem ? editItem.level : '' %>" placeholder="Contoh: Advanced, Proficient">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:100px 100px 140px;gap:18px;margin-top:14px;">
+            <div>
+              <label>Icon / Emoji</label>
+              <input name="icon" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.icon || '🎯') : '🎯' %>" style="text-align:center;">
+            </div>
+            <div>
+              <label>Urutan</label>
+              <input type="number" name="display_order" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.display_order || 0) : 0 %>" style="text-align:center;">
+            </div>
+            <div>
+              <label>Status Tampil</label>
+              <select name="is_public">
+                <option value="1" <%= (typeof editItem !== 'undefined' && editItem && editItem.is_public == 0) ? '' : 'selected' %>>🟢 Public</option>
+                <option value="0" <%= (typeof editItem !== 'undefined' && editItem && editItem.is_public == 0) ? 'selected' : '' %>>🟡 Hidden</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <button class="btn primary">
+              <%= typeof editItem !== 'undefined' && editItem ? 'Update Keahlian' : 'Simpan Keahlian' %>
+            </button>
+            <% if (typeof editItem !== 'undefined' && editItem) { %>
+              <a class="btn" href="/admin/skills">Batal Edit</a>
+            <% } %>
+          </div>
+        </form>
+      </div>
+
+      <!-- Skills Table -->
+      <div class="admin-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:50px;text-align:center;">Icon</th>
+              <th>Nama Keahlian / Tool</th>
+              <th>Kategori</th>
+              <th>Level Kemampuan</th>
+              <th style="width:60px;text-align:center;">Order</th>
+              <th style="width:80px;text-align:center;">Status</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% skills.forEach(s => { %>
+              <tr>
+                <td style="text-align:center;font-size:18px;"><%= s.icon || '🎯' %></td>
+                <td><strong><%= s.name %></strong></td>
+                <td>
+                  <span style="font-size:12px;background:#f5f4ef;padding:3px 8px;border-radius:4px;border:1px solid #e5e3db;">
+                    <%= s.category %>
+                  </span>
+                </td>
+                <td style="font-size:13px;color:var(--muted);"><%= s.level || '-' %></td>
+                <td style="text-align:center;font-weight:700;"><%= s.display_order %></td>
+                <td style="text-align:center;">
+                  <% if (s.is_public == 1) { %>
+                    <span style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:10px;">Public</span>
+                  <% } else { %>
+                    <span style="font-size:11px;font-weight:700;background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:10px;">Hidden</span>
+                  <% } %>
+                </td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/skills?edit=<%= s.id %>">Edit</a>
+                  <form style="display:inline;" method="post" action="/admin/skills/<%= s.id %>/delete" onsubmit="return confirm('Hapus keahlian ini?');">
+                    <button class="small-btn danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

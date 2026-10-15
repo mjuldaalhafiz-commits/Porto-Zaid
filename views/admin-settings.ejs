@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SEO & Website Settings — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'settings' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">SEO & Website Settings</h1>
+          <p class="muted" style="margin:4px 0 0;">Konfigurasi identitas situs, meta tags Google, nomor kontak, tautan sosial, dan pengaturan SEO global.</p>
+        </div>
+      </div>
+
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;">
+          ✅ <%= success %>
+        </div>
+      <% } %>
+
+      <form class="admin-card" method="post" action="/admin/settings/save">
+        <h2 style="font-size:19px;margin-bottom:14px;">🌐 Metadata & SEO Search Engine</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <label>Website Title (Tag &lt;title&gt; Default)</label>
+            <input name="site_title" value="<%= settings.site_title || '' %>" required>
+          </div>
+          <div>
+            <label>Site Tagline</label>
+            <input name="site_tagline" value="<%= settings.site_tagline || '' %>">
+          </div>
+        </div>
+
+        <label>Meta Description (Deskripsi Cuplikan Google Pencarian)</label>
+        <textarea name="meta_description" style="min-height:85px;"><%= settings.meta_description || '' %></textarea>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px;">
+          <div>
+            <label>Canonical Site URL</label>
+            <input name="site_url" value="<%= settings.site_url || 'http://localhost:3000' %>">
+          </div>
+          <div>
+            <label>Google Analytics Tag ID (e.g. G-XXXXX)</label>
+            <input name="google_analytics_id" value="<%= settings.google_analytics_id || '' %>" placeholder="G-XXXXXXXXXX">
+          </div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <label>Google Site Verification Tag / HTML Meta</label>
+          <input name="google_site_verification" value="<%= settings.google_site_verification || '' %>" placeholder="google-site-verification token">
+        </div>
+
+        <h2 style="font-size:19px;margin-top:32px;margin-bottom:14px;padding-top:20px;border-top:1px solid var(--line);">📞 Kontak & Tautan Profesional</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+          <div>
+            <label>Nomor Telepon / WhatsApp</label>
+            <input name="contact_phone" value="<%= settings.contact_phone || '' %>">
+          </div>
+          <div>
+            <label>Email Kontak</label>
+            <input name="contact_email" value="<%= settings.contact_email || '' %>">
+          </div>
+          <div>
+            <label>Domisili / Lokasi</label>
+            <input name="contact_location" value="<%= settings.contact_location || '' %>">
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:14px;">
+          <div>
+            <label>LinkedIn Profile URL</label>
+            <input name="linkedin_url" value="<%= settings.linkedin_url || '' %>">
+          </div>
+          <div>
+            <label>Online Portfolio Link (Bitly / Eksternal)</label>
+            <input name="portfolio_url" value="<%= settings.portfolio_url || '' %>">
+          </div>
+        </div>
+
+        <h2 style="font-size:19px;margin-top:32px;margin-bottom:14px;padding-top:20px;border-top:1px solid var(--line);">⚙️ Pengaturan Crawler & Privasi</h2>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;">
+          <div>
+            <label>Aktifkan XML Sitemap</label>
+            <select name="enable_sitemap">
+              <option value="1" <%= settings.enable_sitemap != '0' ? 'selected' : '' %>>Aktif (/sitemap.xml)</option>
+              <option value="0" <%= settings.enable_sitemap == '0' ? 'selected' : '' %>>Nonaktifkan</option>
+            </select>
+          </div>
+          <div>
+            <label>Aktifkan Robots.txt</label>
+            <select name="enable_robots">
+              <option value="1" <%= settings.enable_robots != '0' ? 'selected' : '' %>>Aktif (/robots.txt)</option>
+              <option value="0" <%= settings.enable_robots == '0' ? 'selected' : '' %>>Nonaktifkan</option>
+            </select>
+          </div>
+          <div>
+            <label>Izin Unduh Dokumen Publik</label>
+            <select name="allow_public_downloads">
+              <option value="1" <%= settings.allow_public_downloads != '0' ? 'selected' : '' %>>Izinkan Pengunjung Download</option>
+              <option value="0" <%= settings.allow_public_downloads == '0' ? 'selected' : '' %>>Kunci Download (Hanya Preview)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:28px;">
+          <button class="btn primary" style="padding:12px 28px;">Simpan Pengaturan SEO & Situs</button>
+        </div>
+      </form>
+    </main>
+  </div>
+</body>
+</html>

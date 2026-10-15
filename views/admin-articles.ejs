@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Articles — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'articles' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1 style="margin:0;">Articles & Blog</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola artikel, blog post, dan konten editorial.</p>
+        </div>
+        <a class="btn primary" href="/admin/articles/new">+ Tulis Artikel Baru</a>
+      </div>
+
+      <div class="admin-card" style="padding:0;overflow:hidden;">
+        <table>
+          <thead>
+            <tr>
+              <th>Judul Artikel</th>
+              <th style="width:100px;text-align:center;">Status</th>
+              <th style="width:140px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% articles.forEach(a => { %>
+              <tr>
+                <td>
+                  <strong><%= a.title %></strong>
+                  <br>
+                  <small class="muted">/<%= a.slug %></small>
+                </td>
+                <td style="text-align:center;">
+                  <% if (a.status === 'published') { %>
+                    <span style="font-size:11px;font-weight:700;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:10px;">Published</span>
+                  <% } else { %>
+                    <span style="font-size:11px;font-weight:700;background:#fef3c7;color:#92400e;padding:2px 7px;border-radius:10px;">Draft</span>
+                  <% } %>
+                </td>
+                <td style="text-align:right;">
+                  <a class="small-btn" href="/admin/articles/<%= a.id %>/edit">Edit</a>
+                  <form style="display:inline;" method="post" action="/admin/articles/<%= a.id %>/delete" onsubmit="return confirm('Hapus artikel ini?');">
+                    <button class="small-btn danger">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+            <% if (articles.length === 0) { %>
+              <tr>
+                <td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">Belum ada artikel. Klik "Tulis Artikel Baru" untuk memulai.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
