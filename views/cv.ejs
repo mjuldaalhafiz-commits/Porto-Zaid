@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Curriculum Vitae — <%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></title>
+  <meta name="description" content="Curriculum Vitae Resmi Muhammad Julda Al Hafiz — HR Generalist">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="kicker">Official Document</div>
+        <h1>Curriculum Vitae</h1>
+        <p class="lead" style="font-weight:600;color:#222;">
+          <%= typeof profile !== 'undefined' && profile?.field ? profile.field : 'HR Generalist' %>
+        </p>
+        <p class="muted" style="max-width:800px;font-size:15.5px;">
+          Dokumen rekam jejak profesional, kompetensi HR, riwayat karir, dan sertifikasi BNSP resmi.
+        </p>
+        <div class="actions" style="margin-top:20px;">
+          <a class="btn primary" href="/cv/download">⬇️ Unduh Berkas PDF Resmi</a>
+          <a class="btn" href="/uploads/<%= profile.cv_file %>" target="_blank">↗️ Buka di Tab Baru</a>
+          <a class="btn" href="/contact">Hubungi Saya</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PDF Viewer Section -->
+    <section class="section" style="padding-top:0;">
+      <div class="container">
+        <div class="card" style="padding:0;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:#fbfbfa;">
+          <div style="padding:16px 22px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:18px;">📄</span>
+              <div>
+                <strong style="font-size:14.5px;color:var(--ink);display:block;"><%= profile.cv_file %></strong>
+                <span class="muted" style="font-size:12px;">Format PDF • Tersedia untuk dibaca & diunduh</span>
+              </div>
+            </div>
+            <a class="small-btn" href="/cv/download">⬇️ Download PDF</a>
+          </div>
+
+          <div style="width:100%;height:850px;background:#525659;position:relative;">
+            <iframe 
+              src="/uploads/<%= profile.cv_file %>#toolbar=1&navpanes=0" 
+              type="application/pdf"
+              width="100%" 
+              height="100%" 
+              style="border:none;display:block;"
+              title="Curriculum Vitae Preview">
+              <div style="padding:40px;text-align:center;color:#fff;">
+                <p>Browser Anda tidak mendukung preview PDF langsung.</p>
+                <a class="btn primary" href="/cv/download" style="margin-top:12px;">Unduh PDF CV</a>
+              </div>
+            </iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></strong><br>
+      HR Generalist · <%= typeof profile !== 'undefined' && profile?.tagline ? profile.tagline : 'From Numbers to Human Impact.' %>
+    </div>
+  </footer>
+</body>
+</html>

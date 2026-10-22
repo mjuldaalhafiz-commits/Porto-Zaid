@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Profile & About Me — Admin CMS</title>
+  <title>Profile & Curriculum Vitae (CV) — Admin CMS</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body class="admin-body">
@@ -13,19 +13,121 @@
     <main class="admin-main">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h1 style="margin:0;">Profile & About Me</h1>
-          <p class="muted" style="margin:4px 0 0;">Kelola biodata profesional, ringkasan profil, informasi kontak, dan berkas CV resmi.</p>
+          <h1 style="margin:0;">Profile & Curriculum Vitae (CV)</h1>
+          <p class="muted" style="margin:4px 0 0;">Kelola biodata profesional, ringkasan profil, informasi kontak, dan visibilitas berkas CV resmi.</p>
         </div>
-        <a class="btn primary" href="/about" target="_blank">Lihat Halaman About ↗</a>
+        <div style="display:flex;gap:10px;">
+          <% if (profile.cv_file && profile.show_cv == 1) { %>
+            <a class="btn" href="/cv" target="_blank">📄 Buka Halaman CV Publik ↗</a>
+          <% } %>
+          <a class="btn primary" href="/about" target="_blank">Lihat Halaman About ↗</a>
+        </div>
       </div>
 
-      <% if (typeof success !== 'undefined' && success) { %>
-        <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;">
-          ✅ <%= success %>
+      <% if (typeof success !== 'undefined' && success == '1') { %>
+        <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #86efac;">
+          ✅ Perubahan data profil dan pengaturan CV berhasil disimpan.
+        </div>
+      <% } else if (typeof success !== 'undefined' && success == '2') { %>
+        <div class="notice" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #fca5a5;">
+          🗑️ Berkas CV berhasil dihapus dari sistem. Tab dan tombol CV telah disembunyikan dari website publik.
         </div>
       <% } %>
 
+      <!-- CV MANAGEMENT CARD -->
+      <div class="admin-card" style="border:2px solid var(--accent);background:#fcfbf9;margin-bottom:26px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div>
+            <h2 style="margin:0 0 4px;display:flex;align-items:center;gap:8px;">
+              <span>📑 Pengaturan Berkas & Tab Curriculum Vitae (CV)</span>
+            </h2>
+            <p class="muted" style="margin:0;font-size:13.5px;">
+              Kontrol apakah menu/tombol CV muncul di website dan ganti atau hapus file PDF CV kapan saja.
+            </p>
+          </div>
+          <div>
+            <% if (profile.cv_file && profile.show_cv == 1) { %>
+              <span style="font-size:12px;font-weight:700;background:#dcfce7;color:#166534;padding:4px 10px;border-radius:12px;border:1px solid #86efac;">
+                🟢 Tab CV Aktif di Website
+              </span>
+            <% } else { %>
+              <span style="font-size:12px;font-weight:700;background:#fee2e2;color:#991b1b;padding:4px 10px;border-radius:12px;border:1px solid #fca5a5;">
+                🔴 Tab CV Disembunyikan (Nonaktif)
+              </span>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Form Update / Ganti CV & Visibilitas -->
+        <form method="post" action="/admin/profile" enctype="multipart/form-data">
+          <!-- Hidden Inputs to preserve profile text fields if only saving CV card -->
+          <input type="hidden" name="name" value="<%= profile.name %>">
+          <input type="hidden" name="field" value="<%= profile.field || '' %>">
+          <input type="hidden" name="tagline" value="<%= profile.tagline || '' %>">
+          <input type="hidden" name="bio" value="<%= profile.bio || '' %>">
+          <input type="hidden" name="email" value="<%= profile.email || '' %>">
+          <input type="hidden" name="linkedin" value="<%= profile.linkedin || '' %>">
+
+          <div style="background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:16px;">
+            <div style="margin-bottom:14px;">
+              <label style="font-weight:700;margin-bottom:6px;display:block;">Visibilitas Tab & Tombol CV di Website Publik</label>
+              <select name="show_cv" style="font-size:14px;padding:8px 12px;border-radius:6px;width:100%;max-width:380px;">
+                <option value="1" <%= profile.show_cv == 1 ? 'selected' : '' %>>🟢 Tampilkan Tab & Tombol CV di Website (Aktif)</option>
+                <option value="0" <%= profile.show_cv == 0 ? 'selected' : '' %>>🟡 Sembunyikan Tab & Tombol CV dari Publik (Hidden / Off)</option>
+              </select>
+              <small class="muted" style="display:block;margin-top:6px;">
+                Jika disembunyikan, menu "Curriculum Vitae" di header navbar, tombol di halaman About/Home/Contact tidak akan terlihat oleh pengunjung.
+              </small>
+            </div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);">
+              <label style="font-weight:700;margin-bottom:6px;display:block;">
+                <%= profile.cv_file ? 'Ganti Berkas CV dengan File Baru (.PDF, Maks 15MB)' : 'Unggah Berkas CV (.PDF, Maks 15MB)' %>
+              </label>
+              <input type="file" name="cv" accept=".pdf" style="padding:8px;background:#fbfbfa;border:1px solid var(--line);border-radius:6px;width:100%;">
+            </div>
+
+            <% if (profile.cv_file) { %>
+              <div style="margin-top:14px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:20px;">📄</span>
+                  <div>
+                    <strong style="font-size:13.5px;color:var(--ink);"><%= profile.cv_file %></strong>
+                    <div style="font-size:11.5px;color:var(--muted);">Berkas CV saat ini tersimpan & aktif di server.</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <a class="small-btn" href="/uploads/<%= profile.cv_file %>" target="_blank">Lihat PDF ↗</a>
+                  <a class="small-btn" href="/cv/download" target="_blank">Test Download ⬇</a>
+                </div>
+              </div>
+            <% } else { %>
+              <div style="margin-top:14px;padding:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;color:#991b1b;font-size:13px;">
+                ⚠️ Belum ada file CV yang tersimpan. Silakan pilih file PDF di atas dan klik Simpan.
+              </div>
+            <% } %>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <button class="btn primary" style="padding:10px 22px;">💾 Simpan Pengaturan CV</button>
+          </div>
+        </form>
+
+        <% if (profile.cv_file) { %>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <span class="muted" style="font-size:12.5px;">Ingin menghapus file CV sepenuhnya dari website & storage?</span>
+            <form method="post" action="/admin/profile/delete-cv" onsubmit="return confirm('Apakah Anda yakin ingin menghapus file CV ini? Tab dan tombol CV di website akan otomatis dinonaktifkan.');">
+              <button class="small-btn danger" style="padding:6px 14px;">🗑️ Hapus Berkas CV Ini</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- MAIN PROFILE & ABOUT ME FORM -->
       <form class="admin-card" method="post" action="/admin/profile" enctype="multipart/form-data">
+        <input type="hidden" name="show_cv" value="<%= profile.show_cv !== undefined ? profile.show_cv : 1 %>">
+
+        <h2>👤 Biodata & Ringkasan Profil (About Me)</h2>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
           <div>
             <label>Nama Lengkap & Gelar *</label>
@@ -54,24 +156,8 @@
           </div>
         </div>
 
-        <div style="margin-top:20px;padding:20px;background:#fbfbfa;border:1px solid var(--line);border-radius:var(--radius);">
-          <label style="margin-top:0;">Unggah / Ganti Berkas CV Resmi (.PDF, Maks 15MB)</label>
-          <input type="file" name="cv" accept=".pdf">
-          <% if (profile.cv_file) { %>
-            <div style="margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-              <span style="font-size:13px;color:var(--muted);">Berkas CV Aktif:</span>
-              <a href="/uploads/<%= profile.cv_file %>" target="_blank" style="font-weight:700;color:var(--accent);font-size:13px;">
-                📄 <%= profile.cv_file %>
-              </a>
-              <a class="small-btn" href="/cv" target="_blank">Test Download CV (/cv)</a>
-            </div>
-          <% } else { %>
-            <p style="font-size:12.5px;color:#b91c1c;margin:8px 0 0;">Belum ada file CV yang diunggah.</p>
-          <% } %>
-        </div>
-
         <div style="margin-top:28px;">
-          <button class="btn primary" style="padding:12px 28px;">Simpan Perubahan Profil</button>
+          <button class="btn primary" style="padding:12px 28px;">Simpan Perubahan Biodata</button>
         </div>
       </form>
     </main>

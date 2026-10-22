@@ -1,0 +1,30 @@
+<nav class="nav">
+  <div class="container nav-in">
+    <a class="brand" href="/"><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></a>
+    <button class="menu-toggle" type="button" onclick="document.querySelector('.nav-links').classList.toggle('open')">Menu ☰</button>
+    <div class="nav-links">
+      <% if (typeof navItems !== 'undefined' && navItems && navItems.length > 0) { %>
+        <% navItems.filter(item => item.is_active == 1).forEach(item => { %>
+          <% if (item.url === '/cv') { %>
+            <% if (typeof profile !== 'undefined' && profile?.show_cv == 1 && profile?.cv_file) { %>
+              <a href="<%= item.url %>" class="<%= typeof currentPath !== 'undefined' && currentPath === item.url ? 'active' : '' %>"><%= item.label %></a>
+            <% } %>
+          <% } else { %>
+            <a href="<%= item.url %>" class="<%= typeof currentPath !== 'undefined' && currentPath === item.url ? 'active' : '' %>"><%= item.label %></a>
+          <% } %>
+        <% }) %>
+      <% } else { %>
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/experience">Experience</a>
+        <a href="/projects">Projects</a>
+        <a href="/articles">Articles</a>
+        <a href="/certifications">Certifications</a>
+        <a href="/contact">Contact</a>
+        <% if (typeof profile !== 'undefined' && profile?.show_cv == 1 && profile?.cv_file) { %>
+          <a href="/cv">Curriculum Vitae</a>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</nav>

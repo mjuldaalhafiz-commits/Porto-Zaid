@@ -165,6 +165,20 @@ function requireAdmin(req, res, next) {
   next();
 }
 
+// Global middleware for views (navigation items & profile)
+app.use((req, res, next) => {
+  try {
+    res.locals.navItems = db.prepare('SELECT * FROM navigation_items ORDER BY display_order ASC, id ASC').all();
+    res.locals.profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+    res.locals.currentPath = req.path;
+  } catch (e) {
+    res.locals.navItems = [];
+    res.locals.profile = null;
+    res.locals.currentPath = req.path;
+  }
+  next();
+});
+
 // ==========================================
 // PUBLIC ROUTES
 // ==========================================
@@ -235,11 +249,19 @@ app.get('/contact', (req, res) => {
   res.render('contact', { profile });
 });
 
-// Download CV
+// Curriculum Vitae Preview & Download
 app.get('/cv', (req, res) => {
-  const profile = db.prepare('SELECT cv_file FROM profile WHERE id=1').get();
-  if (!profile || !profile.cv_file) {
-    return res.status(404).send('CV belum diunggah.');
+  const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+  if (!profile || !profile.cv_file || profile.show_cv != 1) {
+    return res.status(404).render('404');
+  }
+  res.render('cv', { profile });
+});
+
+app.get('/cv/download', (req, res) => {
+  const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+  if (!profile || !profile.cv_file || profile.show_cv != 1) {
+    return res.status(404).send('CV tidak tersedia untuk diunduh.');
   }
   const filePath = path.join(uploadDir, profile.cv_file);
   if (!fs.existsSync(filePath)) {
@@ -388,16 +410,33 @@ app.get('/admin', requireAdmin, (req, res) => {
 // Profile & CV
 app.get('/admin/profile', requireAdmin, (req, res) => {
   const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
-  res.render('admin-profile', { profile });
+  res.render('admin-profile', { 
+    profile, 
+    success: req.query.success || null,
+    error: req.query.error || null 
+  });
 });
 
 app.post('/admin/profile', requireAdmin, upload.single('cv'), (req, res) => {
   const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
-  const cvFile = req.file ? req.file.filename : profile.cv_file;
+  let cvFile = profile.cv_file;
+
+  if (req.file) {
+    cvFile = req.file.filename;
+    // Register in media_files
+    try {
+      db.prepare(`
+        INSERT INTO media_files (filename, original_name, mime_type, file_size, file_type, uploaded_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, 'document', now());
+    } catch (e) { /* ignore duplicate */ }
+  }
+
+  const showCv = req.body.show_cv !== undefined ? Number(req.body.show_cv) : 0;
 
   db.prepare(`
     UPDATE profile
-    SET name=?, field=?, tagline=?, bio=?, email=?, linkedin=?, cv_file=?
+    SET name=?, field=?, tagline=?, bio=?, email=?, linkedin=?, cv_file=?, show_cv=?
     WHERE id=1
   `).run(
     clean(req.body.name),
@@ -406,10 +445,37 @@ app.post('/admin/profile', requireAdmin, upload.single('cv'), (req, res) => {
     clean(req.body.bio),
     clean(req.body.email),
     clean(req.body.linkedin),
-    cvFile
+    cvFile,
+    showCv
   );
 
-  res.redirect('/admin/profile');
+  // Sync navigation_items for /cv
+  try {
+    db.prepare("UPDATE navigation_items SET is_active=? WHERE url='/cv'").run(showCv);
+  } catch (e) { /* ignore */ }
+
+  res.redirect('/admin/profile?success=1');
+});
+
+// Delete CV Endpoint
+app.post('/admin/profile/delete-cv', requireAdmin, (req, res) => {
+  const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+  if (profile && profile.cv_file) {
+    const filePath = path.join(uploadDir, profile.cv_file);
+    if (fs.existsSync(filePath)) {
+      try { fs.unlinkSync(filePath); } catch (e) { /* ignore */ }
+    }
+    // Remove from media_files if present
+    try {
+      db.prepare('DELETE FROM media_files WHERE filename=?').run(profile.cv_file);
+    } catch (e) { /* ignore */ }
+
+    db.prepare('UPDATE profile SET cv_file=NULL, show_cv=0 WHERE id=1').run();
+    try {
+      db.prepare("UPDATE navigation_items SET is_active=0 WHERE url='/cv'").run();
+    } catch (e) { /* ignore */ }
+  }
+  res.redirect('/admin/profile?success=2');
 });
 
 // Articles CRUD
