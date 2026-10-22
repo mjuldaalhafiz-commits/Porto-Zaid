@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Sections & Navigation — Admin CMS</title>
+  <title>Sections, Copywriting & Navigation — Admin CMS</title>
   <link rel="stylesheet" href="/style.css">
 </head>
 <body class="admin-body">
@@ -13,17 +13,162 @@
     <main class="admin-main">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
         <div>
-          <h1 style="margin:0;">Sections & Navigation</h1>
-          <p class="muted" style="margin:4px 0 0;">Atur menu navigasi bar website dan visibilitas setiap section pada halaman beranda.</p>
+          <h1 style="margin:0;">Sections, Copywriting & Navigation</h1>
+          <p class="muted" style="margin:4px 0 0;">Ubah materi copywriting, headline, subjudul, kartu pencapaian, dan menu navigasi website.</p>
         </div>
         <a class="btn primary" href="/" target="_blank">Lihat Tampilan Website ↗</a>
       </div>
 
-      <!-- Navigation Items Manager -->
-      <div class="admin-card">
-        <h2>🧭 Menu Navigasi Website (Navbar Links)</h2>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #86efac;">
+          ✅ Perubahan berhasil disimpan ke database.
+        </div>
+      <% } %>
+
+      <!-- SECTION COPYWRITING MANAGER -->
+      <div class="admin-card" style="margin-bottom:26px;">
+        <h2>📑 Pengaturan Copywriting & Headline Section Beranda</h2>
         <p class="muted" style="margin-top:-6px;margin-bottom:16px;font-size:13.5px;">
-          Tentukan tautan menu yang tampil di header website publik. Anda dapat mengubah label, URL, urutan, atau menyembunyikan menu tertentu.
+          Setiap teks di beranda (kicker atas, headline utama, tagline, dan narasi deskripsi) dapat diubah langsung di sini.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px;">Section</th>
+              <th>Materi Copywriting (Kicker, Judul, Subjudul & Isi Teks)</th>
+              <th style="width:70px;text-align:center;">Urutan</th>
+              <th style="width:125px;text-align:center;">Status</th>
+              <th style="width:90px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% sections.forEach(sec => { %>
+              <tr style="vertical-align:top;">
+                <form method="post" action="/admin/sections/update">
+                  <input type="hidden" name="section_key" value="<%= sec.section_key %>">
+                  <td>
+                    <span style="font-weight:700;color:var(--ink);background:#f2f1ed;padding:4px 8px;border-radius:4px;font-size:11.5px;display:inline-block;margin-top:6px;">
+                      <%= sec.section_key.toUpperCase() %>
+                    </span>
+                  </td>
+                  <td>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px;">
+                      <div>
+                        <label style="font-size:11px;color:var(--muted);margin:0 0 2px;display:block;">Kicker / Label Atas (Huruf Kapital)</label>
+                        <input type="text" name="kicker" value="<%= sec.kicker || '' %>" style="padding:6px 10px;font-size:12.5px;" placeholder="Contoh: PORTFOLIO HIGHLIGHTS">
+                      </div>
+                      <div>
+                        <label style="font-size:11px;color:var(--muted);margin:0 0 2px;display:block;">Subjudul / Tagline / Keterangan</label>
+                        <input type="text" name="subtitle" value="<%= sec.subtitle || '' %>" style="padding:6px 10px;font-size:12.5px;" placeholder="Contoh: From Numbers to Human Impact.">
+                      </div>
+                    </div>
+
+                    <label style="font-size:11px;color:var(--muted);margin:0 0 2px;display:block;">Judul Headline Utama</label>
+                    <input type="text" name="title" value="<%= sec.title %>" style="padding:6px 10px;font-weight:600;margin-bottom:6px;" placeholder="Judul Section">
+
+                    <% if (['hero', 'cta'].includes(sec.section_key)) { %>
+                      <label style="font-size:11px;color:var(--muted);margin:0 0 2px;display:block;">
+                        <%= sec.section_key === 'hero' ? 'Paragraf Deskripsi Profil Utama (Lead Text)' : 'Teks Penjelas Banner Ajakan Kerja Sama' %>
+                      </label>
+                      <textarea name="content" style="min-height:75px;font-size:13px;padding:8px 10px;line-height:1.5;"><%= sec.content || '' %></textarea>
+                    <% } %>
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="number" name="display_order" value="<%= sec.display_order %>" style="width:55px;text-align:center;padding:6px;margin-top:6px;">
+                  </td>
+                  <td style="text-align:center;">
+                    <select name="is_visible" style="padding:6px;margin-top:6px;font-size:12px;">
+                      <option value="1" <%= sec.is_visible == 1 ? 'selected' : '' %>>🟢 Tampilkan</option>
+                      <option value="0" <%= sec.is_visible == 0 ? 'selected' : '' %>>🟡 Sembunyikan</option>
+                    </select>
+                  </td>
+                  <td style="text-align:right;">
+                    <button class="small-btn primary" style="margin-top:6px;padding:6px 14px;">Simpan</button>
+                  </td>
+                </form>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- HIGHLIGHTS / PENCAPAIAN UTAMA CARDS MANAGER -->
+      <div class="admin-card" style="margin-bottom:26px;">
+        <h2>📊 Kartu Pencapaian Utama (Section Highlights)</h2>
+        <p class="muted" style="margin-top:-6px;margin-bottom:16px;font-size:13.5px;">
+          Kelola 4 kartu statistik pencapaian operasional di beranda (misal: "45+ Posisi Terisi", "Sistem Payroll 100+ Karyawan", dll).
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:140px;">Kategori / Meta</th>
+              <th style="width:200px;">Judul Angka / Highlight</th>
+              <th>Deskripsi / Penjelasan Pencapaian</th>
+              <th style="width:60px;text-align:center;">Urutan</th>
+              <th style="width:120px;text-align:right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% (typeof highlights !== 'undefined' ? highlights : []).forEach(hl => { %>
+              <tr style="vertical-align:top;">
+                <form method="post" action="/admin/highlights/save">
+                  <input type="hidden" name="id" value="<%= hl.id %>">
+                  <td>
+                    <input type="text" name="meta" value="<%= hl.meta %>" style="padding:6px 8px;font-size:12px;font-weight:700;" placeholder="RECRUITMENT" required>
+                  </td>
+                  <td>
+                    <input type="text" name="title" value="<%= hl.title %>" style="padding:6px 8px;font-size:13px;font-weight:600;" placeholder="45+ Posisi Terisi" required>
+                  </td>
+                  <td>
+                    <textarea name="description" style="min-height:60px;font-size:12.5px;padding:6px 8px;line-height:1.4;"><%= hl.description %></textarea>
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="number" name="display_order" value="<%= hl.display_order %>" style="width:50px;text-align:center;padding:6px;">
+                  </td>
+                  <td style="text-align:right;">
+                    <button class="small-btn primary" style="margin-bottom:4px;">Save</button>
+                </form>
+                    <form method="post" action="/admin/highlights/<%= hl.id %>/delete" style="display:inline;" onsubmit="return confirm('Hapus kartu pencapaian ini?');">
+                      <button class="small-btn danger">Del</button>
+                    </form>
+                  </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <!-- Add Highlight Form -->
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);">
+          <h3 style="font-size:14.5px;margin-bottom:10px;">+ Tambah Kartu Pencapaian Baru</h3>
+          <form method="post" action="/admin/highlights/save" style="display:grid;grid-template-columns:1fr 1fr 2fr 80px auto;gap:10px;align-items:flex-end;">
+            <div>
+              <label style="margin:0 0 2px;font-size:11.5px;">Kategori / Meta</label>
+              <input name="meta" placeholder="e.g. OPERATIONS" required style="padding:8px;">
+            </div>
+            <div>
+              <label style="margin:0 0 2px;font-size:11.5px;">Judul Pencapaian</label>
+              <input name="title" placeholder="e.g. Efisiensi 30%" required style="padding:8px;">
+            </div>
+            <div>
+              <label style="margin:0 0 2px;font-size:11.5px;">Deskripsi Singkat</label>
+              <input name="description" placeholder="Penjelasan hasil nyata..." required style="padding:8px;">
+            </div>
+            <div>
+              <label style="margin:0 0 2px;font-size:11.5px;">Urutan</label>
+              <input type="number" name="display_order" value="5" style="padding:8px;text-align:center;">
+            </div>
+            <button class="btn primary" style="padding:9px 16px;">Tambah</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- NAVBAR LINKS MANAGER -->
+      <div class="admin-card">
+        <h2>🧭 Menu Navigasi Header Website (Navbar Links)</h2>
+        <p class="muted" style="margin-top:-6px;margin-bottom:16px;font-size:13.5px;">
+          Tentukan tautan menu yang tampil di bar atas website.
         </p>
 
         <table>
@@ -33,7 +178,7 @@
               <th>Label Menu</th>
               <th>Target URL</th>
               <th style="width:100px;text-align:center;">Status</th>
-              <th style="width:140px;text-align:right;">Aksi</th>
+              <th style="width:100px;text-align:right;">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -42,7 +187,7 @@
                 <form method="post" action="/admin/sections/nav/update">
                   <input type="hidden" name="id" value="<%= item.id %>">
                   <td style="text-align:center;">
-                    <input type="number" name="display_order" value="<%= item.display_order %>" style="width:60px;text-align:center;padding:6px;">
+                    <input type="number" name="display_order" value="<%= item.display_order %>" style="width:55px;text-align:center;padding:6px;">
                   </td>
                   <td>
                     <input type="text" name="label" value="<%= item.label %>" style="padding:6px 10px;" required>
@@ -57,85 +202,7 @@
                     </select>
                   </td>
                   <td style="text-align:right;">
-                    <button class="small-btn">Save</button>
-                  </td>
-                </form>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-
-        <!-- Add New Nav Item Form -->
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);">
-          <h3 style="font-size:15px;margin-bottom:10px;">+ Tambah Menu Navigasi Baru</h3>
-          <form method="post" action="/admin/sections/nav/add" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex-grow:1;min-width:180px;">
-              <label style="margin-top:0;">Label Menu</label>
-              <input name="label" placeholder="e.g. CV Download" required>
-            </div>
-            <div style="flex-grow:1;min-width:180px;">
-              <label style="margin-top:0;">Target URL</label>
-              <input name="url" placeholder="e.g. /cv atau https://..." required>
-            </div>
-            <div style="width:90px;">
-              <label style="margin-top:0;">Urutan</label>
-              <input type="number" name="display_order" value="<%= navItems.length + 1 %>" style="text-align:center;">
-            </div>
-            <button class="btn primary" style="padding:11px 18px;">Tambah Menu</button>
-          </form>
-        </div>
-      </div>
-
-      <!-- Homepage Sections Visibility & Copywriting Manager -->
-      <div class="admin-card">
-        <h2>📑 Pengaturan Copywriting & Visibilitas Section Beranda (Homepage)</h2>
-        <p class="muted" style="margin-top:-6px;margin-bottom:16px;font-size:13.5px;">
-          Ubah judul headline, subjudul/keterangan, serta narasi materi untuk setiap section di halaman depan website.
-        </p>
-
-        <table>
-          <thead>
-            <tr>
-              <th style="width:110px;">Section</th>
-              <th>Judul, Subjudul & Isi Teks / Narasi</th>
-              <th style="width:80px;text-align:center;">Urutan</th>
-              <th style="width:130px;text-align:center;">Visibilitas</th>
-              <th style="width:100px;text-align:right;">Simpan</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% sections.forEach(sec => { %>
-              <tr style="vertical-align:top;">
-                <form method="post" action="/admin/sections/update">
-                  <input type="hidden" name="section_key" value="<%= sec.section_key %>">
-                  <td>
-                    <strong style="color:var(--ink);display:block;margin-top:6px;"><%= sec.section_key.toUpperCase() %></strong>
-                  </td>
-                  <td>
-                    <label style="font-size:11.5px;color:var(--muted);margin-top:4px;margin-bottom:2px;display:block;">Judul Headline Section</label>
-                    <input type="text" name="title" value="<%= sec.title %>" style="padding:6px 10px;margin-bottom:8px;font-weight:600;" placeholder="Judul Section">
-                    
-                    <label style="font-size:11.5px;color:var(--muted);margin-bottom:2px;display:block;">Subjudul / Kicker / Label</label>
-                    <input type="text" name="subtitle" value="<%= sec.subtitle || '' %>" style="padding:6px 10px;margin-bottom:8px;font-size:13px;" placeholder="Subjudul / Keterangan">
-
-                    <% if (['hero', 'cta', 'highlights'].includes(sec.section_key)) { %>
-                      <label style="font-size:11.5px;color:var(--muted);margin-bottom:2px;display:block;">
-                        <%= sec.section_key === 'hero' ? 'Paragraf Deskripsi / Lead Hero' : (sec.section_key === 'cta' ? 'Deskripsi Banner Ajakan Kerja Sama' : 'Data Detail Highlights (JSON)') %>
-                      </label>
-                      <textarea name="content" style="min-height:75px;font-size:13px;padding:8px 10px;line-height:1.5;"><%= sec.content || '' %></textarea>
-                    <% } %>
-                  </td>
-                  <td style="text-align:center;">
-                    <input type="number" name="display_order" value="<%= sec.display_order %>" style="width:60px;text-align:center;padding:6px;margin-top:6px;">
-                  </td>
-                  <td style="text-align:center;">
-                    <select name="is_visible" style="padding:6px;margin-top:6px;">
-                      <option value="1" <%= sec.is_visible == 1 ? 'selected' : '' %>>🟢 Tampilkan</option>
-                      <option value="0" <%= sec.is_visible == 0 ? 'selected' : '' %>>🟡 Sembunyikan</option>
-                    </select>
-                  </td>
-                  <td style="text-align:right;">
-                    <button class="small-btn primary" style="margin-top:6px;padding:8px 16px;">Simpan</button>
+                    <button class="small-btn primary">Save</button>
                   </td>
                 </form>
               </tr>

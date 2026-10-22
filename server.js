@@ -205,7 +205,8 @@ app.get('/', (req, res) => {
     .prepare("SELECT * FROM articles WHERE status='published' ORDER BY published_at DESC, id DESC LIMIT 3")
     .all();
   const projects = db.prepare('SELECT * FROM projects WHERE is_public=1 ORDER BY display_order ASC, id DESC LIMIT 6').all();
-  res.render('home', { profile, projects, articles });
+  const highlights = db.prepare('SELECT * FROM highlights ORDER BY display_order ASC, id ASC').all();
+  res.render('home', { profile, projects, articles, highlights });
 });
 
 // About
@@ -906,7 +907,13 @@ app.post('/admin/media/delete', requireAdmin, (req, res) => {
 app.get('/admin/sections', requireAdmin, (req, res) => {
   const navItems = db.prepare('SELECT * FROM navigation_items ORDER BY display_order ASC, id ASC').all();
   const sections = db.prepare('SELECT * FROM site_sections ORDER BY display_order ASC, id ASC').all();
-  res.render('admin-sections', { navItems, sections });
+  const highlights = db.prepare('SELECT * FROM highlights ORDER BY display_order ASC, id ASC').all();
+  res.render('admin-sections', { 
+    navItems, 
+    sections, 
+    highlights, 
+    success: req.query.success || null 
+  });
 });
 
 app.post('/admin/sections/nav/update', requireAdmin, (req, res) => {
@@ -921,7 +928,7 @@ app.post('/admin/sections/nav/update', requireAdmin, (req, res) => {
     WHERE id=?
   `).run(label, url, display_order, is_active, now(), id);
 
-  res.redirect('/admin/sections');
+  res.redirect('/admin/sections?success=nav');
 });
 
 app.post('/admin/sections/nav/add', requireAdmin, (req, res) => {
@@ -934,11 +941,12 @@ app.post('/admin/sections/nav/add', requireAdmin, (req, res) => {
     VALUES (?, ?, ?, 1, ?)
   `).run(label, url, display_order, now());
 
-  res.redirect('/admin/sections');
+  res.redirect('/admin/sections?success=nav');
 });
 
 app.post('/admin/sections/update', requireAdmin, (req, res) => {
   const section_key = clean(req.body.section_key);
+  const kicker = clean(req.body.kicker);
   const title = clean(req.body.title);
   const subtitle = clean(req.body.subtitle);
   const content = req.body.content !== undefined ? req.body.content.trim() : null;
@@ -946,11 +954,35 @@ app.post('/admin/sections/update', requireAdmin, (req, res) => {
   const is_visible = req.body.is_visible !== undefined ? Number(req.body.is_visible) : 1;
 
   db.prepare(`
-    UPDATE site_sections SET title=?, subtitle=?, content=?, display_order=?, is_visible=?, updated_at=?
+    UPDATE site_sections SET kicker=?, title=?, subtitle=?, content=?, display_order=?, is_visible=?, updated_at=?
     WHERE section_key=?
-  `).run(title, subtitle, content, display_order, is_visible, now(), section_key);
+  `).run(kicker, title, subtitle, content, display_order, is_visible, now(), section_key);
 
-  res.redirect('/admin/sections');
+  res.redirect('/admin/sections?success=section');
+});
+
+// Highlights CRUD
+app.post('/admin/highlights/save', requireAdmin, (req, res) => {
+  const id = req.body.id ? Number(req.body.id) : null;
+  const meta = clean(req.body.meta);
+  const title = clean(req.body.title);
+  const description = clean(req.body.description);
+  const display_order = Number(req.body.display_order) || 0;
+
+  if (id) {
+    db.prepare('UPDATE highlights SET meta=?, title=?, description=?, display_order=? WHERE id=?')
+      .run(meta, title, description, display_order, id);
+  } else {
+    db.prepare('INSERT INTO highlights (meta, title, description, display_order) VALUES (?, ?, ?, ?)')
+      .run(meta, title, description, display_order);
+  }
+
+  res.redirect('/admin/sections?success=highlight');
+});
+
+app.post('/admin/highlights/:id/delete', requireAdmin, (req, res) => {
+  db.prepare('DELETE FROM highlights WHERE id=?').run(req.params.id);
+  res.redirect('/admin/sections?success=highlight_deleted');
 });
 
 // ==========================================
