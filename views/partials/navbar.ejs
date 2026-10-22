@@ -5,24 +5,32 @@
     <div class="nav-links">
       <% if (typeof navItems !== 'undefined' && navItems && navItems.length > 0) { %>
         <% navItems.filter(item => item.is_active == 1).forEach(item => { %>
+          <% const isItemActive = (typeof currentPath !== 'undefined' && (currentPath === item.url || (item.url !== '/' && currentPath.startsWith(item.url)))); %>
           <% if (item.url === '/cv') { %>
             <% if (typeof profile !== 'undefined' && profile?.show_cv == 1 && profile?.cv_file) { %>
-              <a href="<%= item.url %>" class="<%= typeof currentPath !== 'undefined' && currentPath === item.url ? 'active' : '' %>"><%= item.label %></a>
+              <a href="<%= item.url %>" class="<%= isItemActive ? 'active' : '' %>"><%= item.label %></a>
             <% } %>
           <% } else { %>
-            <a href="<%= item.url %>" class="<%= typeof currentPath !== 'undefined' && currentPath === item.url ? 'active' : '' %>"><%= item.label %></a>
+            <a href="<%= item.url %>" class="<%= isItemActive ? 'active' : '' %>"><%= item.label %></a>
           <% } %>
         <% }) %>
       <% } else { %>
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/experience">Experience</a>
-        <a href="/projects">Projects</a>
-        <a href="/articles">Articles</a>
-        <a href="/certifications">Certifications</a>
-        <a href="/contact">Contact</a>
+        <% const isHome = typeof currentPath !== 'undefined' && currentPath === '/'; %>
+        <% const isAbout = typeof currentPath !== 'undefined' && currentPath.startsWith('/about'); %>
+        <% const isExp = typeof currentPath !== 'undefined' && currentPath.startsWith('/experience'); %>
+        <% const isProj = typeof currentPath !== 'undefined' && currentPath.startsWith('/projects'); %>
+        <% const isArt = typeof currentPath !== 'undefined' && currentPath.startsWith('/articles'); %>
+        <% const isCert = typeof currentPath !== 'undefined' && currentPath.startsWith('/certifications'); %>
+        <% const isContact = typeof currentPath !== 'undefined' && currentPath.startsWith('/contact'); %>
+        <a href="/" class="<%= isHome ? 'active' : '' %>">Home</a>
+        <a href="/about" class="<%= isAbout ? 'active' : '' %>">About</a>
+        <a href="/experience" class="<%= isExp ? 'active' : '' %>">Experience</a>
+        <a href="/projects" class="<%= isProj ? 'active' : '' %>">Projects</a>
+        <a href="/articles" class="<%= isArt ? 'active' : '' %>">Articles</a>
+        <a href="/certifications" class="<%= isCert ? 'active' : '' %>">Certifications</a>
+        <a href="/contact" class="<%= isContact ? 'active' : '' %>">Contact</a>
         <% if (typeof profile !== 'undefined' && profile?.show_cv == 1 && profile?.cv_file) { %>
-          <a href="/cv">Curriculum Vitae</a>
+          <a href="/cv" class="<%= typeof currentPath !== 'undefined' && currentPath.startsWith('/cv') ? 'active' : '' %>">Curriculum Vitae</a>
         <% } %>
       <% } %>
     </div>

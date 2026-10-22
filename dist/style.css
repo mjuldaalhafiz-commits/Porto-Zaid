@@ -78,6 +78,13 @@ a:hover {
   color: var(--accent);
 }
 
+.nav-links a.active, .links a.active {
+  color: var(--accent);
+  font-weight: 700;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+
 .menu-toggle {
   display: none;
   background: none;

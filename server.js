@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const slugify = require('slugify');
+const { sanitizeHtml, processArticleContent } = require('./lib/article-helper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -255,12 +256,35 @@ app.get('/articles', (req, res) => {
 
 // Single Article
 app.get('/articles/:slug', (req, res) => {
-  const article = db
-    .prepare("SELECT * FROM articles WHERE slug=? AND status='published'")
-    .get(req.params.slug);
+  const isAdmin = Boolean(req.session && req.session.admin);
+  let article = null;
+  if (isAdmin) {
+    article = db.prepare("SELECT * FROM articles WHERE slug=?").get(req.params.slug);
+  } else {
+    article = db.prepare("SELECT * FROM articles WHERE slug=? AND status='published'").get(req.params.slug);
+  }
+
   if (!article) return res.status(404).render('404');
   const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
-  res.render('article', { article, profile, siteUrl: SITE_URL });
+
+  const relatedArticles = db.prepare(`
+    SELECT id, title, slug, excerpt, category, cover, published_at, updated_at
+    FROM articles
+    WHERE status='published' AND id != ?
+    ORDER BY CASE WHEN category = ? THEN 0 ELSE 1 END, published_at DESC, id DESC
+    LIMIT 3
+  `).all(article.id, article.category || '');
+
+  const processed = processArticleContent(article.content);
+
+  res.render('article', { 
+    article, 
+    processed,
+    relatedArticles,
+    profile, 
+    siteUrl: getSiteUrl(),
+    isDraftPreview: article.status !== 'published'
+  });
 });
 
 // Certifications
@@ -568,6 +592,8 @@ app.post('/admin/articles/save', requireAdmin, upload.single('cover'), (req, res
   const status = req.body.status === 'published' ? 'published' : 'draft';
   const publishedAt = status === 'published' ? (existing?.published_at || now()) : null;
   const cover = req.file ? req.file.filename : (existing?.cover || null);
+  const rawContent = clean(req.body.content);
+  const sanitizedContent = sanitizeHtml(rawContent);
 
   if (id && existing) {
     db.prepare(`
@@ -578,7 +604,7 @@ app.post('/admin/articles/save', requireAdmin, upload.single('cover'), (req, res
       title,
       slugVal,
       clean(req.body.excerpt),
-      clean(req.body.content),
+      sanitizedContent,
       clean(req.body.category),
       cover,
       status,
@@ -594,7 +620,7 @@ app.post('/admin/articles/save', requireAdmin, upload.single('cover'), (req, res
       title,
       slugVal,
       clean(req.body.excerpt),
-      clean(req.body.content),
+      sanitizedContent,
       clean(req.body.category),
       cover,
       status,

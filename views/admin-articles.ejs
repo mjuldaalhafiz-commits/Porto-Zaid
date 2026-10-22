@@ -44,6 +44,7 @@
                   <% } %>
                 </td>
                 <td style="text-align:right;">
+                  <a class="small-btn" href="/articles/<%= a.slug %>" target="_blank" title="Lihat artikel">Lihat ↗</a>
                   <a class="small-btn" href="/admin/articles/<%= a.id %>/edit">Edit</a>
                   <form style="display:inline;" method="post" action="/admin/articles/<%= a.id %>/delete" onsubmit="return confirm('Hapus artikel ini?');">
                     <button class="small-btn danger">Delete</button>

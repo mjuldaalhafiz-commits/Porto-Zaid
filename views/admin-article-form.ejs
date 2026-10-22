@@ -1,1 +1,373 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= article ? "Edit Article" : "New Article" %> — Admin</title><link rel="stylesheet" href="/style.css"></head><body class="admin-body"><div class="admin-shell"><aside class="admin-side"><h2 style="font-family:Arial;font-size:22px">Admin CMS</h2><p style="color:#aaa">Muhammad Julda Al Hafiz</p><a href="/admin">Dashboard</a><a href="/admin/profile">Profile & CV</a><a href="/admin/articles">Articles</a><a href="/admin/projects">Projects</a><a href="/admin/experience">Experience</a><a href="/admin/certifications">Certifications</a><a href="/admin/education">Education</a><a href="/" target="_blank">View Public Website ↗</a><form method="post" action="/admin/logout"><button class="small-btn">Logout</button></form></aside><main class="admin-main"><h1><%= article ? "Edit Article" : "New Article" %></h1><form class="admin-card" method="post" action="/admin/articles/save" enctype="multipart/form-data"><input type="hidden" name="id" value="<%= article?.id||"" %>"><label>Title</label><input name="title" value="<%= article?.title||"" %>" required><label>Slug (optional)</label><input name="slug" value="<%= article?.slug||"" %>"><label>Category</label><input name="category" value="<%= article?.category||"" %>" placeholder="e.g. HR, Recruitment, Payroll"><label>Excerpt</label><textarea name="excerpt" style="min-height:90px"><%= article?.excerpt||"" %></textarea><label>Content</label><textarea name="content" required><%= article?.content||"" %></textarea><label>Cover Image</label><input type="file" name="cover" accept="image/*"><% if (article?.cover) { %><p class="muted" style="margin-top:6px">Cover saat ini: <a href="/uploads/<%= article.cover %>" target="_blank"><%= article.cover %></a></p><% } %><label>Status</label><select name="status"><option value="draft" <%= article?.status!=="published"?"selected":"" %>>Draft</option><option value="published" <%= article?.status==="published"?"selected":"" %>>Published</option></select><div style="display:flex;gap:10px;margin-top:20px"><button class="btn primary">Save Article</button><a class="btn" href="/admin/articles">Cancel</a></div></form></main></div></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= article ? ("Edit: " + article.title) : "Tulis Artikel Baru" %> — Admin CMS</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Premium Rich Text Editor Styles */
+    .editor-wrapper {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+      overflow: hidden;
+      margin-top: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .editor-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .editor-toolbar .tb-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding-right: 8px;
+      margin-right: 6px;
+      border-right: 1px solid #e2e8f0;
+    }
+
+    .editor-toolbar .tb-group:last-child {
+      border-right: none;
+      padding-right: 0;
+      margin-right: 0;
+    }
+
+    .editor-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 6px 9px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+
+    .editor-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .editor-btn.active {
+      background: #1e293b;
+      color: #ffffff;
+      border-color: #1e293b;
+    }
+
+    .editor-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    .editor-content-area {
+      min-height: 480px;
+      padding: 28px 32px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 16.5px;
+      line-height: 1.8;
+      color: #1e293b;
+      outline: none;
+      overflow-y: auto;
+    }
+
+    .editor-content-area:focus {
+      outline: none;
+    }
+
+    .editor-content-area p {
+      margin: 0 0 1.25em;
+    }
+
+    .editor-content-area h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 1.8em 0 0.8em;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f1f5f9;
+      font-family: inherit;
+    }
+
+    .editor-content-area h3 {
+      font-size: 19px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 1.5em 0 0.6em;
+      font-family: inherit;
+    }
+
+    .editor-content-area ul, .editor-content-area ol {
+      margin: 0 0 1.3em;
+      padding-left: 28px;
+    }
+
+    .editor-content-area li {
+      margin-bottom: 6px;
+    }
+
+    .editor-content-area blockquote {
+      margin: 1.5em 0;
+      padding: 12px 20px;
+      background: #f8fafc;
+      border-left: 4px solid #1e40af;
+      color: #334155;
+      font-style: italic;
+      border-radius: 0 4px 4px 0;
+    }
+
+    .editor-content-area a {
+      color: #1e40af;
+      text-decoration: underline;
+    }
+
+    .editor-footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 16px;
+      background: #f8fafc;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body class="admin-body">
+  <div class="admin-shell">
+    <%- include('partials/admin-sidebar', { active: 'articles' }) %>
+
+    <main class="admin-main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <a href="/admin/articles" style="font-size:13px;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;margin-bottom:6px;">
+            ← Kembali ke Daftar Artikel
+          </a>
+          <h1 style="margin:0;font-size:26px;">
+            <%= article ? "Edit Artikel" : "Tulis Artikel Baru" %>
+          </h1>
+        </div>
+        <% if (article && article.slug) { %>
+          <a class="small-btn" href="/articles/<%= article.slug %>" target="_blank" style="display:inline-flex;align-items:center;gap:6px;">
+            <span>Lihat di Website</span>
+            <span>↗</span>
+          </a>
+        <% } %>
+      </div>
+
+      <form class="admin-card admin-article-form" method="post" action="/admin/articles/save" enctype="multipart/form-data">
+        <input type="hidden" name="id" value="<%= article?.id || "" %>">
+
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <!-- Title -->
+          <div>
+            <label style="font-weight:700;margin-bottom:6px;display:block;">Judul Artikel <span style="color:var(--danger)">*</span></label>
+            <input 
+              name="title" 
+              value="<%= article?.title || "" %>" 
+              required 
+              placeholder="Contoh: Strategi Rekrutmen End-to-End: Mengisi 45+ Posisi Tanpa Agensi"
+              style="width:100%;font-size:18px;font-weight:700;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);"
+            >
+          </div>
+
+          <!-- Slug & Category Grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div>
+              <label style="font-weight:700;margin-bottom:6px;display:block;">URL Slug (Opsional)</label>
+              <input 
+                name="slug" 
+                value="<%= article?.slug || "" %>" 
+                placeholder="strategi-rekrutmen-end-to-end (otomatis jika kosong)"
+                style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:monospace;font-size:13px;"
+              >
+              <small class="muted" style="display:block;margin-top:4px;">Akan menghasilkan URL: <code>/articles/nama-slug</code></small>
+            </div>
+
+            <div>
+              <label style="font-weight:700;margin-bottom:6px;display:block;">Kategori Artikel</label>
+              <input 
+                name="category" 
+                value="<%= article?.category || "" %>" 
+                list="category-suggestions"
+                placeholder="Pilih atau ketik kategori..."
+                style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);"
+              >
+              <datalist id="category-suggestions">
+                <option value="Recruitment & Talent">
+                <option value="HR Operations & Compliance">
+                <option value="HR Governance & Strategy">
+                <option value="Payroll & Administration">
+                <option value="People & Organization">
+                <option value="General Affairs">
+              </datalist>
+            </div>
+          </div>
+
+          <!-- Excerpt -->
+          <div>
+            <label style="font-weight:700;margin-bottom:6px;display:block;">Ringkasan / Excerpt Singkat</label>
+            <textarea 
+              name="excerpt" 
+              rows="3" 
+              placeholder="Tuliskan 1-3 kalimat ringkasan yang menarik untuk headline artikel dan Google Search..."
+              style="width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:var(--radius);font-family:inherit;font-size:14.5px;line-height:1.5;"
+            ><%= article?.excerpt || "" %></textarea>
+          </div>
+
+          <!-- Cover Image -->
+          <div>
+            <label style="font-weight:700;margin-bottom:6px;display:block;">Gambar Sampul (Cover Image)</label>
+            <% if (article?.cover) { %>
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding:12px;background:#f8fafc;border:1px solid var(--line);border-radius:var(--radius);">
+                <img src="/uploads/<%= article.cover %>" alt="Cover" style="width:120px;height:70px;object-fit:cover;border-radius:4px;border:1px solid #cbd5e1;">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#0f172a;"><%= article.cover %></div>
+                  <a href="/uploads/<%= article.cover %>" target="_blank" style="font-size:12px;color:#1e40af;text-decoration:underline;">Lihat gambar ukuran penuh ↗</a>
+                </div>
+              </div>
+            <% } %>
+            <input type="file" name="cover" accept="image/*" style="font-size:13px;">
+            <small class="muted" style="display:block;margin-top:4px;">Disarankan rasio 16:9 atau landscape (JPG, PNG, WebP).</small>
+          </div>
+
+          <!-- Rich Text Content Editor -->
+          <div>
+            <label style="font-weight:700;margin-bottom:6px;display:block;">
+              Isi Artikel (Visual Rich Text Editor) <span style="color:var(--danger)">*</span>
+            </label>
+            <div class="editor-wrapper">
+              <!-- Sticky Toolbar -->
+              <div class="editor-toolbar" id="editor-toolbar">
+                <!-- Group 1: Undo / Redo -->
+                <div class="tb-group">
+                  <button type="button" class="editor-btn" data-cmd="undo" title="Urungkan (Undo) — Cmd+Z">
+                    <svg viewBox="0 0 24 24"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="redo" title="Ulangi (Redo) — Cmd+Y">
+                    <svg viewBox="0 0 24 24"><path d="M18.4 10.6C16.55 8.99 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Group 2: Headings & Paragraph -->
+                <div class="tb-group">
+                  <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="<p>" title="Teks Paragraf Normal">
+                    <strong>P</strong>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="<h2>" title="Sub-Judul Utama (H2) — Masuk ke Daftar Isi">
+                    <strong>H2</strong>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="<h3>" title="Sub-Sub-Judul (H3)">
+                    <strong>H3</strong>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="formatBlock" data-val="<blockquote>" title="Kutipan (Blockquote)">
+                    <svg viewBox="0 0 24 24"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Group 3: Character Formatting -->
+                <div class="tb-group">
+                  <button type="button" class="editor-btn" data-cmd="bold" title="Tebal (Bold) — Cmd+B">
+                    <strong>B</strong>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="italic" title="Miring (Italic) — Cmd+I">
+                    <em>I</em>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="underline" title="Garis Bawah (Underline) — Cmd+U">
+                    <u>U</u>
+                  </button>
+                </div>
+
+                <!-- Group 4: Lists -->
+                <div class="tb-group">
+                  <button type="button" class="editor-btn" data-cmd="insertUnorderedList" title="Daftar Poin (Bulleted List)">
+                    <svg viewBox="0 0 24 24"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z"/></svg>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="insertOrderedList" title="Daftar Nomor (Numbered List)">
+                    <svg viewBox="0 0 24 24"><path d="M2 17h2v.5H3v1h1v.5H2v1h3v-4H2v1zm1-9h1V4H2v1h1v3zm-1 3h1.8L2 13.1v.9h3v-1H3.2L5 10.9V10H2v1zm5-6v2h14V5H7zm0 14h14v-2H7v2zm0-6h14v-2H7v2z"/></svg>
+                  </button>
+                </div>
+
+                <!-- Group 5: Link & Clean -->
+                <div class="tb-group">
+                  <button type="button" class="editor-btn" data-cmd="createLink" title="Sisipkan / Edit Tautan Link">
+                    <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="unlink" title="Hapus Tautan Link" style="display:none;color:var(--danger);">
+                    <svg viewBox="0 0 24 24"><path d="M17 7h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1 0 1.43-.98 2.63-2.31 2.98l1.46 1.46C20.88 15.61 22 13.95 22 12c0-2.76-2.24-5-5-5zm-1 4h-2.19l2 2H16zM2 4.27l3.11 3.11C3.29 8.12 2 9.91 2 12c0 2.76 2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1 0-1.59 1.21-2.9 2.76-3.07L8.83 11H8v2h2.83l2 2H8v1.9h4c.67 0 1.31-.15 1.88-.41l3.85 3.85 1.41-1.41L3.41 2.86 2 4.27z"/></svg>
+                  </button>
+                  <button type="button" class="editor-btn" data-cmd="removeFormat" title="Hapus Pemformatan (Clear Formatting)">
+                    <span style="font-family:serif;font-size:14px;">T<sub>x</sub></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- ContentEditable Area -->
+              <div 
+                id="editor-area" 
+                class="editor-content-area" 
+                contenteditable="true" 
+                spellcheck="true"
+                data-placeholder="Mulai menulis artikel profesional di sini..."
+              ></div>
+
+              <!-- Hidden Textarea for Form POST -->
+              <textarea name="content" id="article-content" style="display:none;"><%= article?.content || "" %></textarea>
+
+              <!-- Footer Stats Bar -->
+              <div class="editor-footer-bar">
+                <div>
+                  <span id="editor-word-count">0 kata</span> &bull; 
+                  <span id="editor-read-time">~1 menit baca</span>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;">
+                  Gunakan H2 untuk otomatis muncul di Daftar Isi publik
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status & Publish Action -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:20px;border-top:1px solid var(--line);flex-wrap:wrap;gap:14px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <label style="font-weight:700;margin:0;">Status Publikasi:</label>
+              <select name="status" style="padding:8px 14px;border:1px solid var(--line);border-radius:var(--radius);font-weight:600;background:#ffffff;">
+                <option value="draft" <%= article?.status !== "published" ? "selected" : "" %>>Draft (Hanya disimpan di CMS)</option>
+                <option value="published" <%= article?.status === "published" ? "selected" : "" %>>Published (Tayang di Website)</option>
+              </select>
+            </div>
+
+            <div style="display:flex;gap:10px;">
+              <a class="btn" href="/admin/articles">Batal</a>
+              <button type="submit" class="btn primary" style="padding:10px 24px;font-size:14.5px;">
+                <%= article ? "Simpan Perubahan Artikel" : "Publikasikan Artikel" %>
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="/js/admin-editor.js"></script>
+</body>
+</html>

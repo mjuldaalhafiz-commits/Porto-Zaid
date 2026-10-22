@@ -1,1 +1,776 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Article — Muhammad Julda Al Hafiz</title><meta name="description" content="Muhammad Julda Al Hafiz — Human Resources"><link rel="stylesheet" href="/style.css"></head><body><%- include('partials/navbar') %><main><article class="hero"><div class="container"><div class="kicker"><%= article.category||"Article" %> · <%= article.published_at ? new Date(article.published_at).toLocaleDateString("id-ID") : "" %></div><h1><%= article.title %></h1><p class="lead"><%= article.excerpt||"" %></p><% if(article.cover){ %><img class="article-cover" src="/uploads/<%= article.cover %>" alt="<%= article.title %>"><% } %><div class="article-body"><%- (article.content||"").split(/\n{2,}/).map(x=>`<p>${x.replace(/\n/g,"<br>")}</p>`).join("") %></div><p class="muted">Ditulis oleh <strong><%= profile.name %></strong></p></div></article><script type="application/ld+json"><%- JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":article.title,"description":article.excerpt||"","datePublished":article.published_at,"dateModified":article.updated_at,"author":{"@type":"Person","name":profile.name,"url":siteUrl},"mainEntityOfPage":siteUrl+"/articles/"+article.slug,"url":siteUrl+"/articles/"+article.slug}) %></script></main><footer class="footer"><div class="container"><strong>Muhammad Julda Al Hafiz</strong><br>Human Resources · From Numbers to Human Impact.</div></footer></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title><%= article.title %> — Muhammad Julda Al Hafiz</title>
+  <meta name="description" content="<%= article.excerpt || (article.title + ' — Tulisan wawasan Human Resources oleh Muhammad Julda Al Hafiz.') %>">
+  <link rel="canonical" href="<%= siteUrl %>/articles/<%= article.slug %>">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="<%= article.title %>">
+  <meta property="og:description" content="<%= article.excerpt || article.title %>">
+  <meta property="og:url" content="<%= siteUrl %>/articles/<%= article.slug %>">
+  <% if (article.cover) { %>
+    <meta property="og:image" content="<%= siteUrl %>/uploads/<%= article.cover %>">
+  <% } else if (typeof profile !== 'undefined' && profile?.photo) { %>
+    <meta property="og:image" content="<%= siteUrl %>/uploads/<%= profile.photo %>">
+  <% } %>
+  <meta property="article:published_time" content="<%= article.published_at || article.updated_at %>">
+  <meta property="article:author" content="Muhammad Julda Al Hafiz">
+  <meta property="article:section" content="<%= article.category || 'Human Resources' %>">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= article.title %>">
+  <meta name="twitter:description" content="<%= article.excerpt || article.title %>">
+  <% if (article.cover) { %>
+    <meta name="twitter:image" content="<%= siteUrl %>/uploads/<%= article.cover %>">
+  <% } %>
+
+  <!-- JSON-LD Article Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": <%- JSON.stringify(article.title) %>,
+    "description": <%- JSON.stringify(article.excerpt || article.title) %>,
+    "datePublished": "<%= article.published_at || article.updated_at %>",
+    "dateModified": "<%= article.updated_at || article.published_at %>",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "<%= siteUrl %>/articles/<%= article.slug %>"
+    },
+    <% if (article.cover) { %>
+    "image": "<%= siteUrl %>/uploads/<%= article.cover %>",
+    <% } %>
+    "author": {
+      "@type": "Person",
+      "name": "<%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %>",
+      "jobTitle": "HR Generalist",
+      "url": "<%= siteUrl %>"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "<%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %>",
+      "url": "<%= siteUrl %>"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    /* Premium Editorial Article Styles */
+    :root {
+      --art-navy: #0f172a;
+      --art-navy-soft: #1e293b;
+      --art-blue: #1e40af;
+      --art-blue-soft: #eff6ff;
+      --art-slate: #334155;
+      --art-muted: #64748b;
+      --art-border: #e2e8f0;
+      --art-bg-soft: #f8fafc;
+    }
+
+    body {
+      background: #ffffff;
+      color: var(--art-slate);
+    }
+
+    /* Hero Header */
+    .art-hero {
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--art-border);
+      padding: 48px 0 40px;
+    }
+
+    .art-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--art-muted);
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .art-breadcrumb a {
+      color: var(--art-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    .art-breadcrumb a:hover {
+      color: var(--art-blue);
+    }
+
+    .art-category-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--art-blue-soft);
+      color: var(--art-blue);
+      border: 1px solid #bfdbfe;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .art-title {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: clamp(2rem, 4vw, 2.85rem);
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--art-navy);
+      letter-spacing: -0.025em;
+      margin: 0 0 18px 0;
+      max-width: 900px;
+    }
+
+    .art-excerpt {
+      font-size: 1.15rem;
+      line-height: 1.65;
+      color: var(--art-slate);
+      max-width: 860px;
+      margin: 0 0 28px 0;
+      font-weight: 400;
+    }
+
+    .art-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-top: 20px;
+      border-top: 1px solid var(--art-border);
+    }
+
+    .art-author-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .art-author-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      background: var(--art-blue);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .art-author-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .art-author-name {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--art-navy);
+    }
+
+    .art-author-sub {
+      font-size: 12.5px;
+      color: var(--art-muted);
+    }
+
+    .art-meta-chips {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--art-muted);
+    }
+
+    .art-meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Cover Container */
+    .art-cover-wrap {
+      margin-top: 32px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--art-border);
+      background: var(--art-bg-soft);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    .art-cover-img {
+      width: 100%;
+      max-height: 480px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .art-cover-fallback {
+      height: 200px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .art-cover-fallback::before {
+      content: "HR KNOWLEDGE";
+      position: absolute;
+      right: -20px;
+      bottom: -15px;
+      font-size: 72px;
+      font-weight: 900;
+      color: rgba(255,255,255,0.04);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+    }
+
+    /* Editorial Layout Grid */
+    .art-layout {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 50px 24px 80px;
+      display: flex;
+      gap: 56px;
+      align-items: flex-start;
+    }
+
+    .art-main-col {
+      flex: 1 1 740px;
+      min-width: 0;
+    }
+
+    .art-side-col {
+      flex: 0 0 340px;
+      position: sticky;
+      top: 92px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Editorial Body Typography */
+    .art-body {
+      font-size: 1.1rem;
+      line-height: 1.85;
+      color: #334155;
+    }
+
+    .art-body p {
+      margin: 0 0 1.5em;
+    }
+
+    .art-body h2 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--art-navy);
+      letter-spacing: -0.02em;
+      margin: 2.2em 0 0.8em;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--art-border);
+      scroll-margin-top: 96px;
+    }
+
+    .art-body h3 {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--art-navy-soft);
+      letter-spacing: -0.01em;
+      margin: 1.8em 0 0.6em;
+      scroll-margin-top: 96px;
+    }
+
+    .art-body ul, .art-body ol {
+      margin: 0 0 1.6em 0;
+      padding-left: 28px;
+    }
+
+    .art-body li {
+      margin-bottom: 8px;
+      line-height: 1.75;
+    }
+
+    .art-body blockquote {
+      margin: 2em 0;
+      padding: 16px 24px;
+      background: var(--art-bg-soft);
+      border-left: 4px solid var(--art-blue);
+      border-radius: 0 8px 8px 0;
+      color: var(--art-navy-soft);
+      font-style: italic;
+      font-size: 1.12rem;
+    }
+
+    .art-body a {
+      color: var(--art-blue);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.15s ease;
+    }
+
+    .art-body a:hover {
+      color: #1d4ed8;
+    }
+
+    .art-body hr {
+      border: none;
+      border-top: 1px solid var(--art-border);
+      margin: 3em 0;
+    }
+
+    /* References section styling */
+    .art-body ol:has(li:contains("http")),
+    .art-body ol {
+      word-break: break-word;
+    }
+
+    /* Cards in Sidebar */
+    .art-card {
+      background: #ffffff;
+      border: 1px solid var(--art-border);
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    .art-card-header {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--art-muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Table of Contents */
+    .art-toc-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .art-toc-item a {
+      display: block;
+      padding: 6px 10px;
+      font-size: 13.5px;
+      line-height: 1.45;
+      color: var(--art-slate);
+      text-decoration: none;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+      transition: all 0.15s ease;
+    }
+
+    .art-toc-item.level-3 a {
+      padding-left: 20px;
+      font-size: 12.5px;
+      color: var(--art-muted);
+    }
+
+    .art-toc-item a:hover {
+      background: var(--art-bg-soft);
+      color: var(--art-blue);
+    }
+
+    .art-toc-item.active a {
+      background: var(--art-blue-soft);
+      color: var(--art-blue);
+      font-weight: 700;
+      border-left-color: var(--art-blue);
+    }
+
+    /* Related Articles */
+    .art-rel-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .art-rel-item {
+      text-decoration: none;
+      display: block;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--art-border);
+    }
+
+    .art-rel-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .art-rel-cat {
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--art-blue);
+      margin-bottom: 4px;
+    }
+
+    .art-rel-title {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      color: var(--art-navy);
+      transition: color 0.15s ease;
+    }
+
+    .art-rel-item:hover .art-rel-title {
+      color: var(--art-blue);
+    }
+
+    /* Author Footer Box */
+    .art-author-box {
+      margin-top: 48px;
+      padding: 28px;
+      background: var(--art-bg-soft);
+      border: 1px solid var(--art-border);
+      border-radius: 12px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .art-author-box-img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 3px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .art-share-bar {
+      margin-top: 40px;
+      padding: 16px 20px;
+      background: #ffffff;
+      border: 1px solid var(--art-border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .art-layout {
+        flex-direction: column;
+        gap: 40px;
+        padding: 32px 18px 60px;
+      }
+
+      .art-side-col {
+        flex: 1 1 auto;
+        width: 100%;
+        position: static;
+      }
+
+      .art-title {
+        font-size: 24px;
+      }
+
+      .art-meta-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <!-- Draft Notice for Admin -->
+    <% if (typeof isDraftPreview !== 'undefined' && isDraftPreview) { %>
+      <div style="background:#fef3c7;border-bottom:1px solid #fde68a;color:#92400e;padding:10px 24px;font-size:13px;font-weight:600;text-align:center;">
+        ⚠️ Mode Pratinjau Draft: Artikel ini berstatus <strong>Draft</strong> dan hanya terlihat oleh Anda (Admin). Belum tayang untuk publik.
+      </div>
+    <% } %>
+
+    <!-- Article Hero Section -->
+    <header class="art-hero">
+      <div class="container">
+        <!-- Breadcrumb -->
+        <nav class="art-breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span>&rsaquo;</span>
+          <a href="/articles">Articles</a>
+          <span>&rsaquo;</span>
+          <span><%= article.category || 'General' %></span>
+        </nav>
+
+        <!-- Category Badge -->
+        <div class="art-category-pill">
+          <%= article.category || 'Human Resources' %>
+        </div>
+
+        <!-- Article Title -->
+        <h1 class="art-title"><%= article.title %></h1>
+
+        <!-- Excerpt -->
+        <% if (article.excerpt) { %>
+          <p class="art-excerpt"><%= article.excerpt %></p>
+        <% } %>
+
+        <!-- Meta Bar -->
+        <div class="art-meta-bar">
+          <div class="art-author-info">
+            <% if (typeof profile !== 'undefined' && profile?.photo) { %>
+              <img class="art-author-avatar" src="/uploads/<%= profile.photo %>" alt="<%= profile?.name || 'Muhammad Julda Al Hafiz' %>">
+            <% } else { %>
+              <div class="art-author-avatar">JH</div>
+            <% } %>
+            <div class="art-author-meta">
+              <span class="art-author-name"><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></span>
+              <span class="art-author-sub">HR Generalist &bull; Sertifikasi BNSP</span>
+            </div>
+          </div>
+
+          <div class="art-meta-chips">
+            <div class="art-meta-chip">
+              <span>📅</span>
+              <time datetime="<%= article.published_at || article.updated_at %>">
+                <% if (article.published_at) { %>
+                  <%= new Date(article.published_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                <% } else { %>
+                  Terbaru
+                <% } %>
+              </time>
+            </div>
+            <div class="art-meta-chip">
+              <span>⏱️</span>
+              <span><%= processed?.readingTime || 5 %> menit baca</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cover Image or Elegant Fallback Banner -->
+        <div class="art-cover-wrap">
+          <% if (article.cover) { %>
+            <img class="art-cover-img" src="/uploads/<%= article.cover %>" alt="<%= article.title %>">
+          <% } else { %>
+            <div class="art-cover-fallback">
+              <div style="text-align:center;padding:24px;z-index:1;">
+                <div style="font-size:12px;font-weight:800;letter-spacing:0.15em;text-transform:uppercase;color:#93c5fd;margin-bottom:6px;">
+                  HR INSIGHTS & PRACTICE
+                </div>
+                <div style="font-size:20px;font-weight:700;color:#ffffff;max-width:600px;">
+                  <%= article.title %>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </header>
+
+    <!-- Two-Column Editorial Layout -->
+    <section class="art-layout">
+      <!-- Main Content Column -->
+      <article class="art-main-col">
+        <!-- Rendered Sanitized Article HTML -->
+        <div class="art-body" id="article-content-body">
+          <%- processed?.html || "" %>
+        </div>
+
+        <!-- Social Share & Copy Link -->
+        <div class="art-share-bar">
+          <div style="font-size:13.5px;font-weight:700;color:var(--art-navy);">
+            Bagikan wawasan ini:
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <a 
+              class="small-btn" 
+              href="https://api.whatsapp.com/send?text=<%= encodeURIComponent(article.title + ' ' + siteUrl + '/articles/' + article.slug) %>" 
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display:inline-flex;align-items:center;gap:4px;"
+            >
+              <span>💬 WhatsApp</span>
+            </a>
+            <a 
+              class="small-btn" 
+              href="https://www.linkedin.com/sharing/share-offsite/?url=<%= encodeURIComponent(siteUrl + '/articles/' + article.slug) %>" 
+              target="_blank"
+              rel="noopener noreferrer"
+              style="display:inline-flex;align-items:center;gap:4px;"
+            >
+              <span>💼 LinkedIn</span>
+            </a>
+            <button 
+              type="button" 
+              class="small-btn" 
+              id="btn-copy-article-link" 
+              onclick="copyArticleUrl(this)"
+              style="cursor:pointer;"
+            >
+              <span>🔗 Salin Link</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Author Bio Card -->
+        <div class="art-author-box">
+          <% if (typeof profile !== 'undefined' && profile?.photo) { %>
+            <img class="art-author-box-img" src="/uploads/<%= profile.photo %>" alt="<%= profile?.name || 'Muhammad Julda Al Hafiz' %>">
+          <% } else { %>
+            <div class="art-author-box-img" style="background:#1e40af;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px;">JH</div>
+          <% } %>
+          <div>
+            <div style="font-size:16.5px;font-weight:800;color:var(--art-navy);margin-bottom:4px;">
+              <%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %>
+            </div>
+            <p style="margin:0 0 10px 0;font-size:13.5px;color:var(--art-slate);line-height:1.55;">
+              <%= typeof profile !== 'undefined' && profile?.bio ? profile.bio : 'HR Generalist bersertifikat BNSP dengan fokus standardisasi SOP, rekrutmen end-to-end, payroll terintegrasi, dan continuous improvement DMAIC.' %>
+            </p>
+            <div style="display:flex;gap:12px;font-size:13px;">
+              <a href="/about" style="color:var(--art-blue);font-weight:700;text-decoration:none;">Lihat Profil Lengkap &rarr;</a>
+              <a href="/contact" style="color:var(--art-blue);font-weight:700;text-decoration:none;">Hubungi Langsung &rarr;</a>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Sidebar Column -->
+      <aside class="art-side-col">
+        <!-- Table of Contents Card -->
+        <% if (processed && processed.headings && processed.headings.length > 0) { %>
+          <div class="art-card" id="toc-card">
+            <div class="art-card-header">
+              <span>📑</span>
+              <span>Daftar Isi Artikel</span>
+            </div>
+            <ul class="art-toc-list" id="toc-list">
+              <% processed.headings.forEach((h, idx) => { %>
+                <li class="art-toc-item level-<%= h.level %>">
+                  <a href="#<%= h.id %>">
+                    <%= h.text %>
+                  </a>
+                </li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <!-- Related Articles Card -->
+        <% if (typeof relatedArticles !== 'undefined' && relatedArticles && relatedArticles.length > 0) { %>
+          <div class="art-card">
+            <div class="art-card-header">
+              <span>📰</span>
+              <span>Artikel Terkait</span>
+            </div>
+            <div class="art-rel-list">
+              <% relatedArticles.forEach(rel => { %>
+                <a class="art-rel-item" href="/articles/<%= rel.slug %>">
+                  <div class="art-rel-cat"><%= rel.category || 'HR Insights' %></div>
+                  <div class="art-rel-title"><%= rel.title %></div>
+                  <div style="font-size:12px;color:var(--art-muted);margin-top:4px;">
+                    <% if (rel.published_at) { %>
+                      <%= new Date(rel.published_at).toLocaleDateString("id-ID", { month: 'short', year: 'numeric' }) %>
+                    <% } %>
+                  </div>
+                </a>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Quick HR Consultation CTA Card -->
+        <div class="art-card" style="background:linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);border-color:#bfdbfe;">
+          <div class="art-card-header" style="color:var(--art-blue);">
+            <span>🤝</span>
+            <span>Kolaborasi & Diskusi</span>
+          </div>
+          <p style="font-size:13.5px;color:var(--art-slate);line-height:1.55;margin:0 0 14px 0;">
+            Tertarik mendiskusikan implementasi SOP HR, kepatuhan PKWT/PKWTT, atau restrukturisasi sistem rekrutmen di perusahaan Anda?
+          </p>
+          <a class="btn primary" href="/contact" style="width:100%;display:block;text-align:center;font-size:13px;padding:9px 14px;">
+            Hubungi Saya &rarr;
+          </a>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></strong><br>
+      HR Generalist &bull; <%= typeof profile !== 'undefined' && profile?.tagline ? profile.tagline : 'From Numbers to Human Impact.' %>
+    </div>
+  </footer>
+
+  <!-- Table of Contents Active ScrollSpy & Share JS -->
+  <script>
+    function copyArticleUrl(btn) {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span>✅ Tersalin!</span>';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      }).catch(() => {
+        prompt('Salin tautan artikel ini:', window.location.href);
+      });
+    }
+
+    // ScrollSpy for Table of Contents
+    document.addEventListener('DOMContentLoaded', () => {
+      const headings = document.querySelectorAll('.art-body h2, .art-body h3');
+      const tocItems = document.querySelectorAll('.art-toc-item');
+      if (!headings.length || !tocItems.length) return;
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.getAttribute('id');
+            tocItems.forEach(item => {
+              const link = item.querySelector('a');
+              if (link && link.getAttribute('href') === '#' + id) {
+                item.classList.add('active');
+              } else {
+                item.classList.remove('active');
+              }
+            });
+          }
+        });
+      }, {
+        rootMargin: '-80px 0px -70% 0px',
+        threshold: 0
+      });
+
+      headings.forEach(h => observer.observe(h));
+    });
+  </script>
+</body>
+</html>

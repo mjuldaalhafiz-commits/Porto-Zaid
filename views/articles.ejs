@@ -1,1 +1,133 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Articles — Muhammad Julda Al Hafiz</title><meta name="description" content="Muhammad Julda Al Hafiz — Human Resources"><link rel="stylesheet" href="/style.css"></head><body><%- include('partials/navbar') %><main><section class="hero"><div class="container"><div class="kicker">Articles</div><h1>Writing about Human Resources.</h1><p class="lead">Artikel yang dipublikasikan dapat dibaca publik dan memiliki halaman sendiri.</p><div class="grid"><% articles.forEach(a=>{ %><article class="card"><div class="meta"><%= a.category||"HR" %></div><h3><a href="/articles/<%= a.slug %>"><%= a.title %></a></h3><p class="muted"><%= a.excerpt||"" %></p><a class="small-btn" href="/articles/<%= a.slug %>">Read Article →</a></article><% }) %></div></div></section></main><footer class="footer"><div class="container"><strong>Muhammad Julda Al Hafiz</strong><br>Human Resources · From Numbers to Human Impact.</div></footer></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Articles & HR Insights — <%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></title>
+  <meta name="description" content="Kumpulan tulisan praktis, studi kasus regulasi ketenagakerjaan, strategi rekrutmen end-to-end, dan standardisasi SOP HR oleh Muhammad Julda Al Hafiz.">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .articles-hero {
+      padding: 60px 0 44px;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .article-card-item {
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .article-card-item:hover {
+      border-color: #0f172a;
+      box-shadow: 0 6px 18px rgba(15,23,42,0.06);
+      transform: translateY(-2px);
+    }
+
+    .article-card-cat {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #1e40af;
+      margin-bottom: 10px;
+    }
+
+    .article-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin: 0 0 12px 0;
+      color: #0f172a;
+    }
+
+    .article-card-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .article-card-title a:hover {
+      color: #1e40af;
+    }
+
+    .article-card-excerpt {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: #475569;
+      margin: 0 0 20px 0;
+      flex-grow: 1;
+    }
+
+    .article-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+      font-size: 12.5px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <section class="articles-hero">
+      <div class="container">
+        <div class="kicker">HR KNOWLEDGE & PERSPECTIVES</div>
+        <h1 style="margin:10px 0 16px;">Tulisan & Wawasan Praktis Human Resources</h1>
+        <p class="lead" style="max-width:820px;font-size:17px;color:#334155;">
+          Refleksi operasional, kepatuhan regulasi ketenagakerjaan, metodologi rekrutmen end-to-end, dan standardisasi SOP yang diterapkan langsung dalam praktik pengelolaan SDM.
+        </p>
+      </div>
+    </section>
+
+    <section class="section" style="padding:60px 0 90px;">
+      <div class="container">
+        <% if (articles.length > 0) { %>
+          <div class="grid" style="grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));gap:28px;">
+            <% articles.forEach(a => { %>
+              <article class="article-card-item">
+                <div>
+                  <div class="article-card-cat"><%= a.category || "HR Governance" %></div>
+                  <h2 class="article-card-title">
+                    <a href="/articles/<%= a.slug %>"><%= a.title %></a>
+                  </h2>
+                  <p class="article-card-excerpt"><%= a.excerpt || "" %></p>
+                </div>
+                <div class="article-card-footer">
+                  <div>
+                    <% if (a.published_at) { %>
+                      📅 <%= new Date(a.published_at).toLocaleDateString("id-ID", { day: 'numeric', month: 'short', year: 'numeric' }) %>
+                    <% } %>
+                  </div>
+                  <a class="small-btn" href="/articles/<%= a.slug %>" style="font-weight:700;">Baca Artikel &rarr;</a>
+                </div>
+              </article>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div style="text-align:center;padding:60px 20px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:var(--radius);">
+            <p style="font-size:16px;">Belum ada artikel yang dipublikasikan saat ini.</p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <strong><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></strong><br>
+      HR Generalist &bull; <%= typeof profile !== 'undefined' && profile?.tagline ? profile.tagline : 'From Numbers to Human Impact.' %>
+    </div>
+  </footer>
+</body>
+</html>
