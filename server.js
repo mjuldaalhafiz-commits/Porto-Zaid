@@ -285,6 +285,11 @@ app.get('/cv', (req, res) => {
 });
 
 app.get('/cv/download', (req, res) => {
+  const dlSetting = db.prepare("SELECT value FROM settings WHERE key='allow_public_downloads'").get();
+  if (dlSetting && dlSetting.value === '0') {
+    return res.status(403).send('Download publik dinonaktifkan oleh pemilik portofolio.');
+  }
+
   const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
   if (!profile || !profile.cv_file || profile.show_cv != 1) {
     return res.status(404).send('CV tidak tersedia untuk diunduh.');

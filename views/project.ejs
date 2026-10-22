@@ -43,10 +43,15 @@
           </div>
         <% } %>
 
+        <% const canDownload = (typeof siteSettings !== 'undefined' && siteSettings?.allow_public_downloads !== '0'); %>
         <div class="actions" style="margin-top:28px;">
           <% if (project.pdf_file) { %>
-            <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka Dokumen Asli (PDF)</a>
-            <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Unduh PDF</a>
+            <% if (canDownload) { %>
+              <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka Dokumen Asli (PDF)</a>
+              <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Unduh PDF</a>
+            <% } else { %>
+              <span class="btn" style="background:#f0ede7;color:#666;cursor:default;">🔒 Mode Pratinjau (Unduhan Dikunci)</span>
+            <% } %>
           <% } %>
           <a class="btn" href="#evidence-section">Lihat Bukti Visual (Evidence) ↓</a>
         </div>
@@ -169,20 +174,24 @@
       <section class="section" style="background:#fff;">
         <div class="container">
           <div class="kicker">Dokumen Sumber</div>
-          <h2>Pratinjau & Unduh Dokumen Lengkap</h2>
+          <h2><%= canDownload ? 'Pratinjau & Unduh Dokumen Lengkap' : 'Pratinjau Dokumen Sumber' %></h2>
           <p class="muted" style="margin-bottom:24px;">
-            Anda dapat melihat berkas asli secara langsung pada pratinjau di bawah ini atau mengunduhnya untuk dipelajari lebih lanjut.
+            <%= canDownload ? 'Anda dapat melihat berkas asli secara langsung pada pratinjau di bawah ini atau mengunduhnya untuk dipelajari lebih lanjut.' : 'Anda dapat membaca dan meninjau berkas asli secara langsung melalui viewer di bawah ini.' %>
           </p>
 
-          <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-            <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka PDF di Tab Baru</a>
-            <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Download PDF Asli</a>
+          <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center;">
+            <% if (canDownload) { %>
+              <a class="btn primary" href="/uploads/<%= project.pdf_file %>" target="_blank">📄 Buka PDF di Tab Baru</a>
+              <a class="btn" href="/uploads/<%= project.pdf_file %>" download>⬇️ Download PDF Asli</a>
+            <% } else { %>
+              <span style="font-size:13px;font-weight:600;color:#666;background:#f0ede7;padding:6px 12px;border-radius:4px;">🔒 Akses Unduh Dinonaktifkan (Hanya Preview Dokumen)</span>
+            <% } %>
           </div>
 
           <!-- Embedded PDF Viewer -->
           <div style="border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;background:#525659;height:700px;width:100%;">
-            <iframe src="/uploads/<%= project.pdf_file %>" style="width:100%;height:100%;border:none;" title="Pratinjau Dokumen PDF">
-              <p>Browser Anda tidak mendukung preview iframe PDF. Silakan <a href="/uploads/<%= project.pdf_file %>">klik di sini untuk mengunduh PDF</a>.</p>
+            <iframe src="/uploads/<%= project.pdf_file %>#toolbar=<%= canDownload ? '1' : '0' %>" style="width:100%;height:100%;border:none;" title="Pratinjau Dokumen PDF">
+              <p>Browser Anda tidak mendukung preview iframe PDF.</p>
             </iframe>
           </div>
         </div>
