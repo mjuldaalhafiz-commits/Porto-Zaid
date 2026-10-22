@@ -22,6 +22,16 @@ fs.mkdirSync(dataDir, { recursive: true });
 const db = new Database(path.join(dataDir, 'site.db'));
 db.pragma('journal_mode=WAL');
 
+function getSiteUrl() {
+  try {
+    const row = db.prepare("SELECT value FROM settings WHERE key='site_url'").get();
+    if (row && row.value && row.value.trim().length > 0) {
+      return row.value.trim().replace(/\/$/, '');
+    }
+  } catch (e) {}
+  return (process.env.SITE_URL || 'https://portozaid.netlify.app').replace(/\/$/, '');
+}
+
 // Create database schema
 db.exec(`
   CREATE TABLE IF NOT EXISTS profile (
@@ -288,13 +298,15 @@ app.get('/cv/download', (req, res) => {
 
 // Robots.txt
 app.get('/robots.txt', (req, res) => {
+  const currentSiteUrl = getSiteUrl();
   res.type('text/plain').send(
-    `User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: ${SITE_URL}/sitemap.xml\n`
+    `User-agent: *\nAllow: /\nDisallow: /admin\nSitemap: ${currentSiteUrl}/sitemap.xml\n`
   );
 });
 
 // Sitemap.xml
 app.get('/sitemap.xml', (req, res) => {
+  const currentSiteUrl = getSiteUrl();
   const staticUrls = [
     '/',
     '/about',
@@ -302,7 +314,8 @@ app.get('/sitemap.xml', (req, res) => {
     '/projects',
     '/articles',
     '/certifications',
-    '/contact'
+    '/contact',
+    '/cv'
   ];
   const articles = db
     .prepare("SELECT slug, updated_at FROM articles WHERE status='published'")
@@ -311,11 +324,11 @@ app.get('/sitemap.xml', (req, res) => {
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${staticUrls.map((u) => `  <url><loc>${SITE_URL}${u}</loc></url>`).join('\n')}
+${staticUrls.map((u) => `  <url><loc>${currentSiteUrl}${u}</loc></url>`).join('\n')}
 ${articles
   .map(
     (a) =>
-      `  <url><loc>${SITE_URL}/articles/${a.slug}</loc>${
+      `  <url><loc>${currentSiteUrl}/articles/${a.slug}</loc>${
         a.updated_at ? `<lastmod>${a.updated_at}</lastmod>` : ''
       }</url>`
   )
@@ -323,7 +336,7 @@ ${articles
 ${projects
   .map(
     (p) =>
-      `  <url><loc>${SITE_URL}/projects/${p.slug}</loc>${
+      `  <url><loc>${currentSiteUrl}/projects/${p.slug}</loc>${
         p.updated_at ? `<lastmod>${p.updated_at}</lastmod>` : ''
       }</url>`
   )

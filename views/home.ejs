@@ -3,8 +3,96 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title><%= typeof siteSettings !== 'undefined' && siteSettings?.site_title ? siteSettings.site_title : (typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz') %></title>
-  <meta name="description" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.meta_description ? siteSettings.meta_description : 'Muhammad Julda Al Hafiz — HR Generalist' %>">
+  <title><%= typeof siteSettings !== 'undefined' && siteSettings?.site_title ? siteSettings.site_title : (typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz — HR Generalist') %></title>
+  <meta name="description" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.meta_description ? siteSettings.meta_description : 'Portofolio resmi Muhammad Julda Al Hafiz — HR Generalist bersertifikat BNSP, spesialisasi rekrutmen end-to-end, payroll 100+ karyawan, standardisasi 10+ SOP, dan continuous improvement DMAIC.' %>">
+  <link rel="canonical" href="https://portozaid.netlify.app/">
+
+  <% if (typeof siteSettings !== 'undefined' && siteSettings?.google_site_verification) { %>
+    <meta name="google-site-verification" content="<%= siteSettings.google_site_verification %>">
+  <% } %>
+
+  <!-- Open Graph / Facebook / LinkedIn -->
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.site_title ? siteSettings.site_title : 'Muhammad Julda Al Hafiz — HR Generalist' %>">
+  <meta property="og:description" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.meta_description ? siteSettings.meta_description : 'Portofolio resmi Muhammad Julda Al Hafiz — HR Generalist bersertifikat BNSP.' %>">
+  <meta property="og:url" content="https://portozaid.netlify.app/">
+  <% if (typeof profile !== 'undefined' && profile?.photo) { %>
+    <meta property="og:image" content="https://portozaid.netlify.app/uploads/<%= profile.photo %>">
+  <% } %>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.site_title ? siteSettings.site_title : 'Muhammad Julda Al Hafiz — HR Generalist' %>">
+  <meta name="twitter:description" content="<%= typeof siteSettings !== 'undefined' && siteSettings?.meta_description ? siteSettings.meta_description : 'Portofolio resmi Muhammad Julda Al Hafiz — HR Generalist bersertifikat BNSP.' %>">
+  <% if (typeof profile !== 'undefined' && profile?.photo) { %>
+    <meta name="twitter:image" content="https://portozaid.netlify.app/uploads/<%= profile.photo %>">
+  <% } %>
+
+  <!-- JSON-LD Structured Data for Google Search & AI Overview -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://portozaid.netlify.app/#website",
+        "url": "https://portozaid.netlify.app/",
+        "name": "Muhammad Julda Al Hafiz Portfolio",
+        "description": "Portofolio Profesional Human Resources Muhammad Julda Al Hafiz",
+        "publisher": {
+          "@id": "https://portozaid.netlify.app/#person"
+        },
+        "inLanguage": "id-ID"
+      },
+      {
+        "@type": "Person",
+        "@id": "https://portozaid.netlify.app/#person",
+        "name": "Muhammad Julda Al Hafiz",
+        "alternateName": ["Zaid", "Julda Al Hafiz"],
+        "jobTitle": "HR Generalist",
+        "description": "HR Generalist bersertifikat BNSP dengan pengalaman membangun dan menstandarkan fondasi HR: rekrutmen end-to-end (45+ posisi), payroll terintegrasi 100+ karyawan, 10+ SOP & perjanjian kerja PKWT/PKWTT, serta General Affairs dan continuous improvement (DMAIC).",
+        "url": "https://portozaid.netlify.app/",
+        <% if (typeof profile !== 'undefined' && profile?.photo) { %>
+        "image": "https://portozaid.netlify.app/uploads/<%= profile.photo %>",
+        <% } %>
+        "sameAs": [
+          "https://linkedin.com/in/mjuldahafiz",
+          "https://bit.ly/portomjuldahafiz",
+          "https://portozaid.netlify.app/"
+        ],
+        "knowsAbout": [
+          "Human Resources Management",
+          "End-to-End Recruitment",
+          "Talent Acquisition",
+          "Payroll Administration",
+          "Indonesian Labor Law Compliance (PKWT/PKWTT)",
+          "Standard Operating Procedures (SOP)",
+          "DMAIC Six Sigma HR Improvement",
+          "General Affairs",
+          "Manpower Planning & Budgeting"
+        ],
+        "hasCredential": [
+          {
+            "@type": "EducationalOccupationalCredential",
+            "name": "Sertifikasi Profesi Staf Sumber Daya Manusia (HR Staff)",
+            "credentialCategory": "Professional Certification",
+            "recognizedBy": {
+              "@type": "Organization",
+              "name": "Badan Nasional Sertifikasi Profesi (BNSP)"
+            }
+          }
+        ],
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Bekasi",
+          "addressRegion": "Jawa Barat",
+          "addressCountry": "ID"
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
