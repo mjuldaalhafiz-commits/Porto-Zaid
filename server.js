@@ -433,26 +433,36 @@ app.get('/admin/profile', requireAdmin, (req, res) => {
   });
 });
 
-app.post('/admin/profile', requireAdmin, upload.single('cv'), (req, res) => {
+app.post('/admin/profile', requireAdmin, upload.fields([{ name: 'cv', maxCount: 1 }, { name: 'photo', maxCount: 1 }]), (req, res) => {
   const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
   let cvFile = profile.cv_file;
+  let photoFile = profile.photo;
 
-  if (req.file) {
-    cvFile = req.file.filename;
-    // Register in media_files
+  if (req.files && req.files['cv'] && req.files['cv'][0]) {
+    cvFile = req.files['cv'][0].filename;
     try {
       db.prepare(`
         INSERT INTO media_files (filename, original_name, mime_type, file_size, file_type, uploaded_at)
         VALUES (?, ?, ?, ?, ?, ?)
-      `).run(req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, 'document', now());
-    } catch (e) { /* ignore duplicate */ }
+      `).run(cvFile, req.files['cv'][0].originalname, req.files['cv'][0].mimetype, req.files['cv'][0].size, 'document', now());
+    } catch (e) { /* ignore */ }
   }
 
-  const showCv = req.body.show_cv !== undefined ? Number(req.body.show_cv) : 0;
+  if (req.files && req.files['photo'] && req.files['photo'][0]) {
+    photoFile = req.files['photo'][0].filename;
+    try {
+      db.prepare(`
+        INSERT INTO media_files (filename, original_name, mime_type, file_size, file_type, uploaded_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(photoFile, req.files['photo'][0].originalname, req.files['photo'][0].mimetype, req.files['photo'][0].size, 'image', now());
+    } catch (e) { /* ignore */ }
+  }
+
+  const showCv = req.body.show_cv !== undefined ? Number(req.body.show_cv) : (profile.show_cv || 0);
 
   db.prepare(`
     UPDATE profile
-    SET name=?, field=?, tagline=?, bio=?, email=?, linkedin=?, cv_file=?, show_cv=?
+    SET name=?, field=?, tagline=?, bio=?, email=?, linkedin=?, cv_file=?, photo=?, show_cv=?
     WHERE id=1
   `).run(
     clean(req.body.name),
@@ -462,6 +472,7 @@ app.post('/admin/profile', requireAdmin, upload.single('cv'), (req, res) => {
     clean(req.body.email),
     clean(req.body.linkedin),
     cvFile,
+    photoFile,
     showCv
   );
 
@@ -471,6 +482,23 @@ app.post('/admin/profile', requireAdmin, upload.single('cv'), (req, res) => {
   } catch (e) { /* ignore */ }
 
   res.redirect('/admin/profile?success=1');
+});
+
+// Delete Profile Photo Endpoint
+app.post('/admin/profile/delete-photo', requireAdmin, (req, res) => {
+  const profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+  if (profile && profile.photo) {
+    const filePath = path.join(uploadDir, profile.photo);
+    if (fs.existsSync(filePath)) {
+      try { fs.unlinkSync(filePath); } catch (e) { /* ignore */ }
+    }
+    try {
+      db.prepare('DELETE FROM media_files WHERE filename=?').run(profile.photo);
+    } catch (e) { /* ignore */ }
+
+    db.prepare('UPDATE profile SET photo=NULL WHERE id=1').run();
+  }
+  res.redirect('/admin/profile?success=3');
 });
 
 // Delete CV Endpoint

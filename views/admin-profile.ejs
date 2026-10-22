@@ -26,13 +26,72 @@
 
       <% if (typeof success !== 'undefined' && success == '1') { %>
         <div class="notice" style="background:#dcfce7;color:#166534;border-color:#86efac;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #86efac;">
-          ✅ Perubahan data profil dan pengaturan CV berhasil disimpan.
+          ✅ Perubahan data profil dan berkas berhasil disimpan.
         </div>
       <% } else if (typeof success !== 'undefined' && success == '2') { %>
         <div class="notice" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #fca5a5;">
           🗑️ Berkas CV berhasil dihapus dari sistem. Tab dan tombol CV telah disembunyikan dari website publik.
         </div>
+      <% } else if (typeof success !== 'undefined' && success == '3') { %>
+        <div class="notice" style="background:#fee2e2;color:#991b1b;border-color:#fca5a5;margin-bottom:20px;padding:12px 18px;border-radius:var(--radius);border:1px solid #fca5a5;">
+          🗑️ Foto profil berhasil dihapus dari sistem.
+        </div>
       <% } %>
+
+      <!-- PROFILE PHOTO MANAGEMENT CARD -->
+      <div class="admin-card" style="margin-bottom:26px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div>
+            <h2 style="margin:0 0 4px;">🖼️ Foto Profil Profesional</h2>
+            <p class="muted" style="margin:0;font-size:13.5px;">Foto ini akan ditampilkan di header Beranda (Home) dan halaman Tentang Saya (About).</p>
+          </div>
+          <% if (profile.photo) { %>
+            <span style="font-size:12px;font-weight:700;background:#dcfce7;color:#166534;padding:4px 10px;border-radius:12px;border:1px solid #86efac;">
+              🟢 Foto Terpasang
+            </span>
+          <% } else { %>
+            <span style="font-size:12px;font-weight:700;background:#fef3c7;color:#92400e;padding:4px 10px;border-radius:12px;border:1px solid #fde68a;">
+              ⚪ Belum Ada Foto
+            </span>
+          <% } %>
+        </div>
+
+        <form method="post" action="/admin/profile" enctype="multipart/form-data" style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;">
+          <input type="hidden" name="name" value="<%= profile.name %>">
+          <input type="hidden" name="field" value="<%= profile.field || '' %>">
+          <input type="hidden" name="tagline" value="<%= profile.tagline || '' %>">
+          <input type="hidden" name="bio" value="<%= profile.bio || '' %>">
+          <input type="hidden" name="email" value="<%= profile.email || '' %>">
+          <input type="hidden" name="linkedin" value="<%= profile.linkedin || '' %>">
+          <input type="hidden" name="show_cv" value="<%= profile.show_cv !== undefined ? profile.show_cv : 1 %>">
+
+          <div style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:3px solid var(--accent);background:#f2f1ed;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+            <% if (profile.photo) { %>
+              <img src="/uploads/<%= profile.photo %>" alt="<%= profile.name %>" style="width:100%;height:100%;object-fit:cover;">
+            <% } else { %>
+              <span style="font-size:42px;">👤</span>
+            <% } %>
+          </div>
+
+          <div style="flex-grow:1;min-width:240px;">
+            <label style="font-weight:700;margin-bottom:6px;display:block;">Pilih Berkas Foto Baru (.JPG, .PNG, .WEBP)</label>
+            <input type="file" name="photo" accept="image/*" style="padding:8px;background:#fbfbfa;border:1px solid var(--line);border-radius:6px;width:100%;">
+            <small class="muted" style="display:block;margin-top:6px;">Disarankan foto formal/semi-formal berasio kotak (1:1) dengan resolusi minimal 400x400 piksel.</small>
+            
+            <div style="margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <button class="btn primary" style="padding:8px 18px;">Simpan Foto</button>
+            </div>
+          </div>
+        </form>
+
+        <% if (profile.photo) { %>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;">
+            <form method="post" action="/admin/profile/delete-photo" onsubmit="return confirm('Apakah Anda yakin ingin menghapus foto profil ini?');">
+              <button class="small-btn danger">🗑️ Hapus Foto Profil</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
 
       <!-- CV MANAGEMENT CARD -->
       <div class="admin-card" style="border:2px solid var(--accent);background:#fcfbf9;margin-bottom:26px;">
