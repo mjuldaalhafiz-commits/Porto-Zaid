@@ -1240,6 +1240,30 @@ app.get('/admin/security/backup/download/:filename', requireAdmin, (req, res) =>
 });
 
 // ==========================================
+// ONE-CLICK PUBLISH TO NETLIFY / GITHUB
+// ==========================================
+app.post('/admin/publish-sync', requireAdmin, (req, res) => {
+  const { execSync } = require('child_process');
+  try {
+    // 1. Export static HTML files to dist/
+    execSync('node export-dist.js', { cwd: __dirname });
+    // 2. Commit & Push to GitHub
+    execSync('git add -A && git commit -m "Auto-publish from Admin CMS" && git push origin main', { cwd: __dirname });
+
+    const backUrl = req.headers.referer || '/admin';
+    const cleanUrl = backUrl.replace(/[?&]published=[^&]+/, '');
+    const sep = cleanUrl.includes('?') ? '&' : '?';
+    res.redirect(`${cleanUrl}${sep}published=1`);
+  } catch (err) {
+    console.error('Publish sync error:', err.message);
+    const backUrl = req.headers.referer || '/admin';
+    const cleanUrl = backUrl.replace(/[?&]published=[^&]+/, '');
+    const sep = cleanUrl.includes('?') ? '&' : '?';
+    res.redirect(`${cleanUrl}${sep}published=error`);
+  }
+});
+
+// ==========================================
 // 404 CATCH-ALL
 // ==========================================
 app.use((req, res) => {

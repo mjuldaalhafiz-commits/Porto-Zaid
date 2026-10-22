@@ -48,10 +48,41 @@
     </a>
   </nav>
 
-  <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:8px;">
-    <a href="/" target="_blank" style="font-size:12.5px;color:#0a84ff;padding:6px 12px;background:rgba(10,132,255,0.1);border-radius:4px;display:flex;align-items:center;justify-content:space-between;">
-      <span>Lihat Website Publik</span>
-      <span>↗</span>
+  <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:10px;">
+    <!-- One-click Publish to Netlify -->
+    <form method="post" action="/admin/publish-sync" style="margin:0;">
+      <button type="submit" id="btn-publish-sync" style="width:100%;padding:10px 14px;font-size:13px;font-weight:700;color:#fff;background:#2e7d32;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 6px rgba(46,125,50,0.3);transition:all 0.2s;" onclick="this.innerHTML='⏳ Sedang Mengunggah...'; this.style.opacity='0.7'; this.style.pointerEvents='none'; this.form.submit();">
+        <span>🚀 Publish ke Netlify</span>
+      </button>
+    </form>
+
+    <div id="publish-notification" style="display:none;padding:10px;border-radius:6px;font-size:12px;line-height:1.4;"></div>
+
+    <script>
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const notif = document.getElementById('publish-notification');
+        if (params.get('published') === '1') {
+          notif.style.display = 'block';
+          notif.style.background = 'rgba(46,125,50,0.15)';
+          notif.style.color = '#4caf50';
+          notif.style.border = '1px solid rgba(76,175,80,0.3)';
+          notif.innerHTML = '✅ <strong>Berhasil dipublish!</strong> Perubahan telah dikirim ke GitHub & Netlify sedang update (~15 detik).';
+        } else if (params.get('published') === 'error') {
+          notif.style.display = 'block';
+          notif.style.background = 'rgba(211,47,47,0.15)';
+          notif.style.color = '#ef5350';
+          notif.style.border = '1px solid rgba(239,83,80,0.3)';
+          notif.innerHTML = '❌ <strong>Gagal mempublikasikan.</strong> Periksa koneksi internet atau coba lagi.';
+        }
+      })();
+    </script>
+
+    <a href="https://portozaid.netlify.app" target="_blank" style="font-size:12px;color:#0a84ff;padding:8px 12px;background:rgba(10,132,255,0.1);border-radius:6px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;">
+      <span>Lihat Website Netlify ↗</span>
+    </a>
+    <a href="/" target="_blank" style="font-size:12px;color:#aaa;padding:6px 12px;background:rgba(255,255,255,0.05);border-radius:6px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;">
+      <span>Preview Lokal (Port 3000) ↗</span>
     </a>
     <form method="post" action="/admin/logout" style="margin:0;">
       <button class="small-btn danger" style="width:100%;padding:8px 12px;text-align:center;">Logout</button>
