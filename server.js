@@ -165,15 +165,30 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Global middleware for views (navigation items & profile)
+// Global middleware for views (navigation items, profile, sections & settings)
 app.use((req, res, next) => {
   try {
     res.locals.navItems = db.prepare('SELECT * FROM navigation_items ORDER BY display_order ASC, id ASC').all();
     res.locals.profile = db.prepare('SELECT * FROM profile WHERE id=1').get();
+    
+    // Load sections as a key-indexed map
+    const secRows = db.prepare('SELECT * FROM site_sections ORDER BY display_order ASC, id ASC').all();
+    const secMap = {};
+    secRows.forEach(s => { secMap[s.section_key] = s; });
+    res.locals.siteSections = secMap;
+
+    // Load settings as a key-value map
+    const setRows = db.prepare('SELECT key, value FROM settings').all();
+    const setMap = {};
+    setRows.forEach(s => { setMap[s.key] = s.value; });
+    res.locals.siteSettings = setMap;
+
     res.locals.currentPath = req.path;
   } catch (e) {
     res.locals.navItems = [];
     res.locals.profile = null;
+    res.locals.siteSections = {};
+    res.locals.siteSettings = {};
     res.locals.currentPath = req.path;
   }
   next();
@@ -926,13 +941,14 @@ app.post('/admin/sections/update', requireAdmin, (req, res) => {
   const section_key = clean(req.body.section_key);
   const title = clean(req.body.title);
   const subtitle = clean(req.body.subtitle);
+  const content = req.body.content !== undefined ? req.body.content.trim() : null;
   const display_order = Number(req.body.display_order) || 0;
   const is_visible = req.body.is_visible !== undefined ? Number(req.body.is_visible) : 1;
 
   db.prepare(`
-    UPDATE site_sections SET title=?, subtitle=?, display_order=?, is_visible=?, updated_at=?
+    UPDATE site_sections SET title=?, subtitle=?, content=?, display_order=?, is_visible=?, updated_at=?
     WHERE section_key=?
-  `).run(title, subtitle, display_order, is_visible, now(), section_key);
+  `).run(title, subtitle, content, display_order, is_visible, now(), section_key);
 
   res.redirect('/admin/sections');
 });

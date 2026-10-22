@@ -86,18 +86,18 @@
         </div>
       </div>
 
-      <!-- Homepage Sections Visibility Manager -->
+      <!-- Homepage Sections Visibility & Copywriting Manager -->
       <div class="admin-card">
-        <h2>📑 Pengaturan Section Halaman Beranda (Homepage)</h2>
+        <h2>📑 Pengaturan Copywriting & Visibilitas Section Beranda (Homepage)</h2>
         <p class="muted" style="margin-top:-6px;margin-bottom:16px;font-size:13.5px;">
-          Nyalakan atau matikan section yang ingin ditampilkan di halaman depan tanpa mengedit template kode.
+          Ubah judul headline, subjudul/keterangan, serta narasi materi untuk setiap section di halaman depan website.
         </p>
 
         <table>
           <thead>
             <tr>
-              <th>Nama Section</th>
-              <th>Judul / Keterangan</th>
+              <th style="width:110px;">Section</th>
+              <th>Judul, Subjudul & Isi Teks / Narasi</th>
               <th style="width:80px;text-align:center;">Urutan</th>
               <th style="width:130px;text-align:center;">Visibilitas</th>
               <th style="width:100px;text-align:right;">Simpan</th>
@@ -105,27 +105,37 @@
           </thead>
           <tbody>
             <% sections.forEach(sec => { %>
-              <tr>
+              <tr style="vertical-align:top;">
                 <form method="post" action="/admin/sections/update">
                   <input type="hidden" name="section_key" value="<%= sec.section_key %>">
                   <td>
-                    <strong><%= sec.section_key.toUpperCase() %></strong>
+                    <strong style="color:var(--ink);display:block;margin-top:6px;"><%= sec.section_key.toUpperCase() %></strong>
                   </td>
                   <td>
-                    <input type="text" name="title" value="<%= sec.title %>" style="padding:6px 10px;margin-bottom:4px;" placeholder="Judul Section">
-                    <input type="text" name="subtitle" value="<%= sec.subtitle || '' %>" style="padding:4px 10px;font-size:12px;color:var(--muted);" placeholder="Subjudul / Keterangan">
+                    <label style="font-size:11.5px;color:var(--muted);margin-top:4px;margin-bottom:2px;display:block;">Judul Headline Section</label>
+                    <input type="text" name="title" value="<%= sec.title %>" style="padding:6px 10px;margin-bottom:8px;font-weight:600;" placeholder="Judul Section">
+                    
+                    <label style="font-size:11.5px;color:var(--muted);margin-bottom:2px;display:block;">Subjudul / Kicker / Label</label>
+                    <input type="text" name="subtitle" value="<%= sec.subtitle || '' %>" style="padding:6px 10px;margin-bottom:8px;font-size:13px;" placeholder="Subjudul / Keterangan">
+
+                    <% if (['hero', 'cta', 'highlights'].includes(sec.section_key)) { %>
+                      <label style="font-size:11.5px;color:var(--muted);margin-bottom:2px;display:block;">
+                        <%= sec.section_key === 'hero' ? 'Paragraf Deskripsi / Lead Hero' : (sec.section_key === 'cta' ? 'Deskripsi Banner Ajakan Kerja Sama' : 'Data Detail Highlights (JSON)') %>
+                      </label>
+                      <textarea name="content" style="min-height:75px;font-size:13px;padding:8px 10px;line-height:1.5;"><%= sec.content || '' %></textarea>
+                    <% } %>
                   </td>
                   <td style="text-align:center;">
-                    <input type="number" name="display_order" value="<%= sec.display_order %>" style="width:60px;text-align:center;padding:6px;">
+                    <input type="number" name="display_order" value="<%= sec.display_order %>" style="width:60px;text-align:center;padding:6px;margin-top:6px;">
                   </td>
                   <td style="text-align:center;">
-                    <select name="is_visible" style="padding:6px;">
+                    <select name="is_visible" style="padding:6px;margin-top:6px;">
                       <option value="1" <%= sec.is_visible == 1 ? 'selected' : '' %>>🟢 Tampilkan</option>
                       <option value="0" <%= sec.is_visible == 0 ? 'selected' : '' %>>🟡 Sembunyikan</option>
                     </select>
                   </td>
                   <td style="text-align:right;">
-                    <button class="small-btn">Save</button>
+                    <button class="small-btn primary" style="margin-top:6px;padding:8px 16px;">Simpan</button>
                   </td>
                 </form>
               </tr>
