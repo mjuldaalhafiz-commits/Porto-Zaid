@@ -1,0 +1,7 @@
+<footer class="footer">
+  <div class="container">
+    <% const footerSec = (typeof siteSections !== 'undefined' && siteSections['footer']) ? siteSections['footer'] : null; %>
+    <strong><%= (footerSec && footerSec.title) ? footerSec.title : (typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz') %></strong><br>
+    <%= (footerSec && footerSec.subtitle) ? footerSec.subtitle : (typeof profile !== 'undefined' && profile?.tagline ? ('HR Generalist · ' + profile.tagline) : 'HR Generalist · From Numbers to Human Impact.') %>
+  </div>
+</footer>

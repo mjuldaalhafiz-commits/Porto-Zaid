@@ -727,12 +727,7 @@
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="container">
-      <strong><%= typeof profile !== 'undefined' && profile?.name ? profile.name : 'Muhammad Julda Al Hafiz' %></strong><br>
-      HR Generalist &bull; <%= typeof profile !== 'undefined' && profile?.tagline ? profile.tagline : 'From Numbers to Human Impact.' %>
-    </div>
-  </footer>
+  <%- include('partials/footer') %>
 
   <!-- Table of Contents Active ScrollSpy & Share JS -->
   <script>
