@@ -809,6 +809,7 @@ app.post('/admin/certifications/save', requireAdmin, upload.single('file'), (req
   const expiry_date = clean(req.body.expiry_date) || null;
   const credential_id = clean(req.body.credential_id) || null;
   const description = clean(req.body.description) || null;
+  const display_order = Number(req.body.display_order) || 0;
   const status = req.body.status === 'published' ? 'published' : 'draft';
   const is_downloadable = req.body.is_downloadable ? 1 : 0;
   const file = req.file ? req.file.filename : (existing?.file || null);
@@ -817,17 +818,17 @@ app.post('/admin/certifications/save', requireAdmin, upload.single('file'), (req
     db.prepare(`
       UPDATE certifications
       SET title=?, issuer=?, year=?, issue_date=?, expiry_date=?, credential_id=?,
-          description=?, status=?, is_downloadable=?, file=?, updated_at=?
+          description=?, display_order=?, status=?, is_downloadable=?, file=?, updated_at=?
       WHERE id=?
     `).run(title, issuer, year, issue_date, expiry_date, credential_id,
-           description, status, is_downloadable, file, now(), id);
+           description, display_order, status, is_downloadable, file, now(), id);
   } else {
     db.prepare(`
       INSERT INTO certifications (title, issuer, year, issue_date, expiry_date, credential_id,
-                                  description, status, is_downloadable, file, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  description, display_order, status, is_downloadable, file, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(title, issuer, year, issue_date, expiry_date, credential_id,
-           description, status, is_downloadable, file, now());
+           description, display_order, status, is_downloadable, file, now());
   }
 
   res.redirect('/admin/certifications');
@@ -1074,7 +1075,8 @@ app.post('/admin/settings/save', requireAdmin, (req, res) => {
     'google_analytics_id', 'google_site_verification',
     'contact_phone', 'contact_email', 'contact_location',
     'linkedin_url', 'portfolio_url',
-    'enable_sitemap', 'enable_robots', 'allow_public_downloads'
+    'enable_sitemap', 'enable_robots', 'allow_public_downloads',
+    'article_cta_title', 'article_cta_desc', 'article_cta_btn_text', 'article_cta_btn_url'
   ];
 
   const upsert = db.prepare(`

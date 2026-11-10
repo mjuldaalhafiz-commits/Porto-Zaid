@@ -111,6 +111,32 @@
           </div>
         </div>
 
+        <h2 style="margin-top:32px;font-size:20px;border-top:1px solid var(--line);padding-top:24px;">🤝 Sidebar Artikel: Kotak Kolaborasi & Diskusi (CTA)</h2>
+        <p class="muted" style="margin-top:-6px;margin-bottom:18px;font-size:13.5px;">
+          Sesuaikan materi teks ajakan diskusi/konsultasi yang muncul di sidebar halaman baca artikel.
+        </p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div>
+            <label>Judul CTA Sidebar</label>
+            <input name="article_cta_title" value="<%= settings.article_cta_title || 'Kolaborasi & Diskusi' %>" placeholder="Contoh: Kolaborasi & Diskusi">
+          </div>
+          <div>
+            <label>Teks Tombol CTA</label>
+            <input name="article_cta_btn_text" value="<%= settings.article_cta_btn_text || 'Hubungi Saya →' %>" placeholder="Contoh: Hubungi Saya →">
+          </div>
+        </div>
+
+        <div>
+          <label>Deskripsi / Kalimat Ajakan</label>
+          <textarea name="article_cta_desc" style="min-height:75px;"><%= settings.article_cta_desc || 'Tertarik mendiskusikan implementasi SOP HR, kepatuhan PKWT/PKWTT, atau restrukturisasi sistem rekrutmen di perusahaan Anda?' %></textarea>
+        </div>
+
+        <div>
+          <label>Target URL Tombol</label>
+          <input name="article_cta_btn_url" value="<%= settings.article_cta_btn_url || '/contact' %>" placeholder="/contact atau https://wa.me/...">
+        </div>
+
         <div style="margin-top:28px;">
           <button class="btn primary" style="padding:12px 28px;">Simpan Pengaturan SEO & Situs</button>
         </div>

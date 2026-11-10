@@ -36,18 +36,24 @@
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 100px;gap:18px;">
+          <div style="display:grid;grid-template-columns:1fr 1.3fr 1fr 90px;gap:18px;">
             <div>
               <label>Tanggal / Waktu Terbit</label>
               <input name="issue_date" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.issue_date || editItem.year || '') : '' %>" placeholder="Contoh: Oktober 2025">
             </div>
             <div>
-              <label>Masa Berlaku (Jika Ada)</label>
-              <input name="expiry_date" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.expiry_date || '') : '' %>" placeholder="Contoh: Oktober 2028 / Seumur Hidup">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <label style="margin:0;">Masa Berlaku</label>
+                <label style="font-size:11px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;font-weight:normal;">
+                  <input type="checkbox" id="no-expiry-check" onchange="toggleNoExpiry(this)" style="margin:0;">
+                  <span>Tanpa Masa Berlaku</span>
+                </label>
+              </div>
+              <input name="expiry_date" id="expiry-date-input" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.expiry_date || '') : '' %>" placeholder="Contoh: Oktober 2028" style="margin-top:6px;">
             </div>
             <div>
-              <label>Credential ID (Jika Tersedia)</label>
-              <input name="credential_id" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.credential_id || '') : '' %>" placeholder="Nomor Registrasi / Lisensi">
+              <label>Credential ID (Lisensi / No. SKKNI)</label>
+              <input name="credential_id" value="<%= typeof editItem !== 'undefined' && editItem ? (editItem.credential_id || '') : '' %>" placeholder="Nomor lisensi / ID">
             </div>
             <div>
               <label>Urutan</label>
@@ -162,5 +168,49 @@
       </div>
     </main>
   </div>
+
+  <script>
+    function toggleNoExpiry(chk) {
+      const input = document.getElementById('expiry-date-input');
+      if (!input) return;
+      if (chk.checked) {
+        input.dataset.oldVal = input.value;
+        input.value = 'Tanpa Batas Waktu';
+        input.readOnly = true;
+        input.style.background = '#f1f5f9';
+      } else {
+        input.value = input.dataset.oldVal || '';
+        input.readOnly = false;
+        input.style.background = '#ffffff';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('expiry-date-input');
+      const chk = document.getElementById('no-expiry-check');
+      if (input && chk) {
+        const val = (input.value || '').toLowerCase().trim();
+        if (val === 'tanpa batas waktu' || val === 'seumur hidup' || val === 'lifetime' || val === 'tidak ada' || val === '-') {
+          chk.checked = true;
+          input.readOnly = true;
+          input.style.background = '#f1f5f9';
+        }
+      }
+    });
+
+    function resetForm() {
+      const form = document.querySelector('#cert-form form');
+      if (form) {
+        form.reset();
+        const idInput = form.querySelector('input[name="id"]');
+        if (idInput) idInput.value = '';
+        const expiryInput = document.getElementById('expiry-date-input');
+        if (expiryInput) {
+          expiryInput.readOnly = false;
+          expiryInput.style.background = '#ffffff';
+        }
+      }
+    }
+  </script>
 </body>
 </html>

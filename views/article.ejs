@@ -707,16 +707,20 @@
         <% } %>
 
         <!-- Quick HR Consultation CTA Card -->
+        <% const ctaTitle = (typeof siteSettings !== 'undefined' && siteSettings?.article_cta_title) ? siteSettings.article_cta_title : 'Kolaborasi & Diskusi'; %>
+        <% const ctaDesc = (typeof siteSettings !== 'undefined' && siteSettings?.article_cta_desc) ? siteSettings.article_cta_desc : 'Tertarik mendiskusikan implementasi SOP HR, kepatuhan PKWT/PKWTT, atau restrukturisasi sistem rekrutmen di perusahaan Anda?'; %>
+        <% const ctaBtnText = (typeof siteSettings !== 'undefined' && siteSettings?.article_cta_btn_text) ? siteSettings.article_cta_btn_text : 'Hubungi Saya →'; %>
+        <% const ctaBtnUrl = (typeof siteSettings !== 'undefined' && siteSettings?.article_cta_btn_url) ? siteSettings.article_cta_btn_url : '/contact'; %>
         <div class="art-card" style="background:linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);border-color:#bfdbfe;">
           <div class="art-card-header" style="color:var(--art-blue);">
             <span>🤝</span>
-            <span>Kolaborasi & Diskusi</span>
+            <span><%= ctaTitle %></span>
           </div>
           <p style="font-size:13.5px;color:var(--art-slate);line-height:1.55;margin:0 0 14px 0;">
-            Tertarik mendiskusikan implementasi SOP HR, kepatuhan PKWT/PKWTT, atau restrukturisasi sistem rekrutmen di perusahaan Anda?
+            <%= ctaDesc %>
           </p>
-          <a class="btn primary" href="/contact" style="width:100%;display:block;text-align:center;font-size:13px;padding:9px 14px;">
-            Hubungi Saya &rarr;
+          <a class="btn primary" href="<%= ctaBtnUrl %>" style="width:100%;display:block;text-align:center;font-size:13px;padding:9px 14px;">
+            <%= ctaBtnText %>
           </a>
         </div>
       </aside>
