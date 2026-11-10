@@ -1268,25 +1268,75 @@ app.get('/admin/security/backup/download/:filename', requireAdmin, (req, res) =>
 });
 
 // ==========================================
-// ONE-CLICK PUBLISH TO NETLIFY / GITHUB
+// ONE-CLICK INSTANT PUBLISH TO NETLIFY API
 // ==========================================
-app.post('/admin/publish-sync', requireAdmin, (req, res) => {
+app.post('/admin/publish-sync', requireAdmin, async (req, res) => {
   const { execSync } = require('child_process');
+  const https = require('https');
+  const backUrl = req.headers.referer || '/admin';
+  const cleanUrl = backUrl.replace(/[?&]published=[^&]+/, '');
+  const sep = cleanUrl.includes('?') ? '&' : '?';
+
   try {
     // 1. Export static HTML files to dist/
     execSync('node export-dist.js', { cwd: __dirname });
-    // 2. Commit & Push to GitHub
-    execSync('git add -A && git commit -m "Auto-publish from Admin CMS" && git push origin main', { cwd: __dirname });
 
-    const backUrl = req.headers.referer || '/admin';
-    const cleanUrl = backUrl.replace(/[?&]published=[^&]+/, '');
-    const sep = cleanUrl.includes('?') ? '&' : '?';
+    const netlifyToken = process.env.NETLIFY_AUTH_TOKEN || 'nfp_GauMp3pBgXpggbPFokoanQL4Yp4V75Wk0080';
+    const netlifySiteId = process.env.NETLIFY_SITE_ID || '997e8ccc-51be-40df-b629-5ebbd62de37a';
+
+    if (netlifyToken && netlifySiteId) {
+      // 2. Compress dist into zip file
+      const zipPath = path.join(__dirname, 'deploy-temp.zip');
+      if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+      execSync(`cd dist && zip -r -q "${zipPath}" .`, { cwd: __dirname });
+
+      const zipStats = fs.statSync(zipPath);
+
+      // 3. Deploy directly to Netlify API (Instant, bypasses build queues!)
+      await new Promise((resolve, reject) => {
+        const netlifyReq = https.request({
+          hostname: 'api.netlify.com',
+          path: `/api/v1/sites/${netlifySiteId}/deploys`,
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${netlifyToken}`,
+            'Content-Type': 'application/zip',
+            'Content-Length': zipStats.size,
+            'User-Agent': 'PortoZaid-Admin-Deployer'
+          }
+        }, (netlifyRes) => {
+          let resData = '';
+          netlifyRes.on('data', chunk => resData += chunk);
+          netlifyRes.on('end', () => {
+            try { if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath); } catch (e) {}
+            if (netlifyRes.statusCode >= 200 && netlifyRes.statusCode < 300) {
+              resolve(resData);
+            } else {
+              reject(new Error(`Netlify API Error (${netlifyRes.statusCode}): ${resData.slice(0, 200)}`));
+            }
+          });
+        });
+
+        netlifyReq.on('error', (err) => {
+          try { if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath); } catch (e) {}
+          reject(err);
+        });
+
+        const fileStream = fs.createReadStream(zipPath);
+        fileStream.pipe(netlifyReq);
+      });
+    }
+
+    // 4. Also background commit & push to GitHub for repo history backup
+    try {
+      execSync('git add -A && git commit -m "Auto-publish from Admin CMS" && git push origin main', { cwd: __dirname });
+    } catch (gitErr) {
+      console.warn('Git push warning (non-fatal):', gitErr.message);
+    }
+
     res.redirect(`${cleanUrl}${sep}published=1`);
   } catch (err) {
     console.error('Publish sync error:', err.message);
-    const backUrl = req.headers.referer || '/admin';
-    const cleanUrl = backUrl.replace(/[?&]published=[^&]+/, '');
-    const sep = cleanUrl.includes('?') ? '&' : '?';
     res.redirect(`${cleanUrl}${sep}published=error`);
   }
 });
