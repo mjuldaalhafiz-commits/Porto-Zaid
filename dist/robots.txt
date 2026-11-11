@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Sitemap: https://portozaid.netlify.app/sitemap.xml
+Sitemap: https://portomjuldaalhafiz.netlify.app/sitemap.xml
